@@ -16,19 +16,19 @@ function Login() {
         <div className="flex flex-col space-y-4">
           
           <button
-            className="bg-gradient-to-r from-green-400 to-yellow-400 hover:from-green-500 hover:to-yellow-500 text-white font-bold py-2 px-4 rounded"
+            className="bg-secondary text-white font-bold py-2 px-4 rounded"
             onClick={() => console.log('Admin Login')}
           >
             Admin Login
           </button>
           <button
-            className="bg-gradient-to-r from-green-400 to-yellow-400 hover:from-green-500 hover:to-yellow-500 text-white font-bold py-2 px-4 rounded"
+            className="bg-secondary text-white font-bold py-2 px-4 rounded"
             onClick={() => console.log('Mentor Login')}
           >
             Mentor Login
           </button>
           <button
-            className="bg-gradient-to-r from-green-400 to-yellow-400 hover:from-green-500 hover:to-yellow-500 text-white font-bold py-2 px-4 rounded"
+            className="bg-secondary text-white font-bold py-2 px-4 rounded"
             onClick={() => console.log('Mentee Login')}
           >
             Mentee Login
