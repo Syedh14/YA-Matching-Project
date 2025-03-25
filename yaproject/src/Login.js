@@ -4,7 +4,7 @@ import logo from './images/logo.png';
 function Login() {
   return (
     
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F5DC]">
+    <div className="min-h-screen flex items-center justify-center bg-primary">
       
       <div className="bg-white shadow-md rounded p-8 max-w-md w-full">
         
