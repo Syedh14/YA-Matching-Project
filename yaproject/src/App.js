@@ -1,9 +1,10 @@
 
+import Login from './Login';
 
 function App() {
   return (
     <div>
-      <h1 className="text-7xl text-center text-blue-400">tailwind testing</h1>
+      <Login />
     </div>
   );
 }
