@@ -1,5 +1,7 @@
 import React from 'react';
-import logo from './images/logo.png';
+import { Link } from 'react-router-dom';
+import logo from '../images/logo.png';
+
 
 function Login() {
   return (
@@ -41,6 +43,11 @@ function Login() {
             Create an account
           </a>
         </p>
+        <div className="text-center mt-4">
+          <Link to="/test-header" className="text-blue-600 hover:underline">
+            Go to Test Header Page
+          </Link>
+        </div>
       </div>
     </div>
   );
