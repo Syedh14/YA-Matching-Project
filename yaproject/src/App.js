@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Import pages
 import Login from './pages/Login';
 import TestHeaderPage from './pages/test'; // The page that uses Header
-
+import ProgressReports from './progress_report/pr_page';
 function App() {
   return (
     <Router>
@@ -18,6 +18,7 @@ function App() {
         <Route path="/test-header" element={<TestHeaderPage />} />
         
         {/* Add more routes here as needed */}
+        <Route path="/progress_report" element={<ProgressReports />} />
       </Routes>
     </Router>
   );

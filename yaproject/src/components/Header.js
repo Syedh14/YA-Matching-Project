@@ -8,7 +8,7 @@ const Header = () => {
   // Define your navigation links
   const navLinks = [
     { name: 'Home', path: '/home' },
-    { name: 'Progress Reports', path: '/progress-reports' },
+    { name: 'Progress Reports', path: '/progress_report' },
     { name: 'Resources', path: '/resources' },
     { name: 'Profile', path: '/profile' },
   ];
