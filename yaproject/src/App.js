@@ -18,9 +18,9 @@ function App() {
         <Route path="/test-header" element={<TestHeaderPage />} />
 
         <Route path="/" element={<Login />} />
-        <Route path="/admin" element={<AdminDash />} />
-        <Route path="/mentor" element={<MentorDash />} />
-        <Route path="/mentee" element={<MenteeDash />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/mentor" element={<MentorDashboard />} />
+        <Route path="/mentee" element={<MenteeDashboard />} />
         
         {/* Add more routes here as needed */}
         <Route path="/progress_report" element={<ProgressReports />} />
