@@ -89,6 +89,7 @@ function Login() {
       setTimeout(() => {
         navigate(`/${role}`); // ✅ redirect based on role
       }, 800); // delay to show the success message
+      localStorage.setItem('userRole', role);
     } else {
       setMessage('❌ Invalid credentials. Please try again.');
     }
