@@ -6,7 +6,7 @@ import ProgressReportModal from './progressreportmodal';
 function ProgressReports() {
     const [selectedReport, setSelectedReport] = useState(null);
     const [showModal, setShowModal] = useState(false);
-  
+    const [sortBy, setSortBy] = useState('id');
     
     const reports = [
       {
@@ -108,7 +108,21 @@ function ProgressReports() {
       setSelectedReport(null);
       setShowModal(false);
     };
+    const sortedReports = [...reports].sort((a, b) => {
+      if (sortBy === 'id') {
+        // Sort by ID (ascending)
+        return a.id - b.id;
+      } else {
+        // Sort by Date (ascending)
+        return new Date(a.date) - new Date(b.date);
+      }
+    });
   
+    // NEW: Handle the "Sort By" button click
+    // Toggles between 'id' and 'date'
+    const handleSortBy = () => {
+      setSortBy(sortBy === 'id' ? 'date' : 'id');
+    };
     return (
       <div>
         <Header />
@@ -116,15 +130,17 @@ function ProgressReports() {
           {/* Title and Sort Button */}
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold">Progress Reports</h1>
-            <button className="bg-secondary text-white px-4 py-2 rounded">
-              Sort By
+            <button
+             onClick={handleSortBy}
+             className="bg-secondary text-white px-4 py-2 rounded">
+              Sort By {sortBy === 'id' ? 'Date' : 'ID'}
             </button>
           </div>
   
           {/* Scrollable container */}
           <div className="h-[80vh] overflow-y-auto border p-4">
             <div className="grid grid-cols-3 gap-4">
-              {reports.map((report) => (
+              {sortedReports.map((report) => (
                 <div
                   key={report.id}
                   className="border p-16 flex flex-col items-center justify-center bg-
