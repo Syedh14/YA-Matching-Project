@@ -7,6 +7,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import TestHeaderPage from './pages/test'; // The page that uses Header
 import ProgressReports from './progress_report/pr_page';
+import AdminDashboard from './pages/AdminDashboard';
+import MentorDashboard from './pages/MentorDashboard';
+import MenteeDashboard from './pages/MenteeDashboard';
 function App() {
   return (
     <Router>
