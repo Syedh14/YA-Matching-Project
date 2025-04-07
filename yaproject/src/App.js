@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import TestHeaderPage from './pages/test'; // The page that uses Header
 import ProgressReports from './progress_report/pr_page';
+import Resources from './resources/Resources';
 function App() {
   return (
     <Router>
@@ -19,6 +20,8 @@ function App() {
         
         {/* Add more routes here as needed */}
         <Route path="/progress_report" element={<ProgressReports />} />
+
+        <Route path="/resources" element={<Resources />} />
       </Routes>
     </Router>
   );
