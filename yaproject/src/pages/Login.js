@@ -85,7 +85,9 @@ function Login() {
 
     if (userMatch) {
       setMessage('✅ Login successful!');
-      // Add navigation logic here
+      setTimeout(() => {
+        navigate(`/${role}`); // ✅ redirect based on role
+      }, 800); // delay to show the success message
     } else {
       setMessage('❌ Invalid credentials. Please try again.');
     }

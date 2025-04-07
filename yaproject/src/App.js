@@ -16,6 +16,11 @@ function App() {
         
         {/* The route for testing the header */}
         <Route path="/test-header" element={<TestHeaderPage />} />
+
+        <Route path="/" element={<Login />} />
+        <Route path="/admin" element={<AdminDash />} />
+        <Route path="/mentor" element={<MentorDash />} />
+        <Route path="/mentee" element={<MenteeDash />} />
         
         {/* Add more routes here as needed */}
         <Route path="/progress_report" element={<ProgressReports />} />
