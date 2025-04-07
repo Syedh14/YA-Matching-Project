@@ -56,7 +56,7 @@
 // export default Login;
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../images/logo.png';
 import users from '../data/users';
 
@@ -66,6 +66,7 @@ function Login() {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const openModal = (selectedRole) => {
     setRole(selectedRole);
