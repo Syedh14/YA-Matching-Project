@@ -7,6 +7,7 @@ function ProgressReports() {
     const [selectedReport, setSelectedReport] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [sortBy, setSortBy] = useState('id');
     const [reports, setReports] = useState([
       {
         id: 1,
@@ -123,6 +124,23 @@ function ProgressReports() {
       setSelectedReport(null);
       setShowModal(false);
     };
+  
+   const sortedReports = [...reports].sort((a, b) => {
+      if (sortBy === 'id') {
+        // Sort by ID (ascending)
+        return a.id - b.id;
+      } else {
+        // Sort by Date (ascending)
+        return new Date(a.date) - new Date(b.date);
+      }
+    });
+  
+      // NEW: Handle the "Sort By" button click
+    // Toggles between 'id' and 'date'
+    const handleSortBy = () => {
+      setSortBy(sortBy === 'id' ? 'date' : 'id');
+    };
+  
 
     const handleNewReportChange = (e) => {
       setNewReport({ ...newReport, [e.target.name]: e.target.value });
@@ -144,63 +162,18 @@ function ProgressReports() {
       setShowAddForm(false);
     };
   
-  //   return (
-  //     <div>
-  //       <Header />
-  //       <div className="bg-white p-4">
-  //         {/* Title and Sort Button */}
-  //         <div className="flex justify-between items-center mb-4">
-  //           <h1 className="text-2xl font-bold">Progress Reports</h1>
-  //           <button className="bg-secondary text-white px-4 py-2 rounded">
-  //             Sort By
-  //           </button>
-  //         </div>
-  
-  //         {/* Scrollable container */}
-  //         <div className="h-[80vh] overflow-y-auto border p-4">
-  //           <div className="grid grid-cols-3 gap-4">
-  //             {reports.map((report) => (
-  //               <div
-  //                 key={report.id}
-  //                 className="border p-16 flex flex-col items-center justify-center bg-
-  //                            hover:shadow-md transition-shadow cursor-pointer"
-  //                 onClick={() => handleCardClick(report)}
-  //               >
-  //                 <div className="text-gray-800 text-lg mb-2">
-  //                   Progress Report
-  //                 </div>
-  //                 <div className="text-gray-500 text-sm">
-  //                   {`Date: ${report.date}`}
-  //                 </div>
-  //               </div>
-  //             ))}
-  //           </div>
-  //         </div>
-  //       </div>
-  
-  //       {/* The Modal Pop-up */}
-  //       {showModal && selectedReport && (
-  //         <ProgressReportModal
-  //           report={selectedReport}
-  //           onClose={closeModal}
-  //         />
-  //       )}
-  //     </div>
-  //   );
-  // }
-  
-  // export default ProgressReports;
 
-  return (
-    <div>
-      <Header />
-      <div className="bg-white p-4">
-        {/* Title and Sort Button */}
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Progress Reports</h1>
-          <div className="flex gap-2">
-            <button className="bg-secondary text-white px-4 py-2 rounded">
-              Sort By
+    return (
+      <div>
+        <Header />
+        <div className="bg-white p-4">
+          {/* Title and Sort Button */}
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold">Progress Reports</h1>
+            <button
+             onClick={handleSortBy}
+             className="bg-secondary text-white px-4 py-2 rounded">
+              Sort By {sortBy === 'id' ? 'Date' : 'ID'}
             </button>
             {role === 'mentor' && (
               <button
@@ -262,9 +235,6 @@ function ProgressReports() {
               >
                 Cancel
               </button>
-            </div>
-          </div>
-        )}
 
         {/* Scrollable Report Grid */}
         <div className="h-[70vh] overflow-y-auto border p-4">

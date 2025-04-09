@@ -10,6 +10,7 @@ import ProgressReports from './progress_report/pr_page';
 import AdminDashboard from './pages/AdminDashboard';
 import MentorDashboard from './pages/MentorDashboard';
 import MenteeDashboard from './pages/MenteeDashboard';
+import Resources from './resources/Resources';
 function App() {
   return (
     <Router>
@@ -27,6 +28,8 @@ function App() {
         
         {/* Add more routes here as needed */}
         <Route path="/progress_report" element={<ProgressReports />} />
+
+        <Route path="/resources" element={<Resources />} />
       </Routes>
     </Router>
   );

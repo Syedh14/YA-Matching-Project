@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-
+import logo from '../images/logo.png';
 const Header = () => {
   // useLocation allows us to get the current URL path
   const location = useLocation();
@@ -14,13 +14,12 @@ const Header = () => {
   ];
 
   return (
-    <nav className="flex items-center space-x-48 p-6">
-      {navLinks.map((link) => {
-        // Check if the current path is the same as the link path
-        const isActive = location.pathname === link.path;
-
-        return (
-          <Link
+    <nav className="flex items-center justify-between p-6 border-b border-black">
+      <div className="flex space-x-48">
+    {navLinks.map((link) => {
+      const isActive = location.pathname === link.path;
+      return (
+        <Link
           key={link.name}
           to={link.path}
           className={`
@@ -33,12 +32,18 @@ const Header = () => {
               : 'bg-white text-secondary border-secondary hover:bg-secondary hover:text-white'
             }
           `}
-          >
-            {link.name}
-          </Link>
-        );
-      })}
-    </nav>
+        >
+          {link.name}
+        </Link>
+      );
+    })}
+  </div>
+
+  {/* Logo on the right side */}
+  <div>
+    <img src={logo} alt="Logo" className="w-16 h-16" />
+  </div>
+</nav>
   );
 };
 
