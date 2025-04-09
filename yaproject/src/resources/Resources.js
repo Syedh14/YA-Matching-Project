@@ -6,7 +6,7 @@ import FilterBar from '../components/FilterBar'
 function Resources() {
   // Example data structure for resources
   // Eventually this from SQL backend
-  const allResources = [
+  const [resources, setResources] = useState([
     {
       id: 1,
       title: 'Algebra Basics',
@@ -44,14 +44,48 @@ function Resources() {
       date: '2025-04-04',
     },
     // ... add more as needed
-  ];
+  ]);
+
+
+
+  const [showAddForm, setShowAddForm] = useState(false);
+      const [newResource, setNewResource] = useState({
+        title: '',
+        type: '',
+        visibility: '',
+        createdBy: '',
+        format: '',
+      });
+      
+  const handleNewResourceChange = (e) => {
+    setNewResource({ ...newResource, [e.target.name]: e.target.value });
+  };
+
+  const handleAddResource = () => {
+    const resourceToAdd = {
+      id: resources.length + 1,
+      date: new Date().toISOString().split('T')[0],
+      ...newResource,
+      visibility: 'my'
+    };
+    setResources([...resources, resourceToAdd]);
+    setNewResource({
+      title: '',
+      type: '',
+      visibility: '',
+      createdBy: '',
+      format: ''
+    });
+    setShowAddForm(false);
+  };
+    
 
   // State to hold the current filter selection
   const [filter, setFilter] = useState('all'); 
   // e.g., "my", "global", "math", "mentor", "mentee", "videos", etc.
 
   // Filter the resources based on the user's selection
-  const filteredResources = allResources.filter((resource) => {
+  const filteredResources = resources.filter((resource) => {
     if (filter === 'all') return true;
     if (filter === 'my' && resource.visibility === 'my') return true;
     if (filter === 'global' && resource.visibility === 'global') return true;
@@ -97,6 +131,78 @@ function Resources() {
               {myResources.length === 0 && (
                 <p className="text-gray-500">No resources found.</p>
               )}
+
+          <button
+            className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
+            onClick={() => setShowAddForm(true)}
+          >
+            +
+          </button>
+
+
+
+          {/* Add Report Form */}
+          {showAddForm && (
+            <div className="mb-4 border p-4 rounded bg-gray-100">
+              <h2 className="font-semibold text-lg mb-2">New Resource</h2>
+              <input
+                type="text"
+                name="title"
+                placeholder="Title"
+                className="border p-2 mb-2 w-full"
+                value={newResource.title}
+                onChange={handleNewResourceChange}
+              />
+              <input
+                type="text"
+                name="type"
+                placeholder="Resource Type"
+                className="border p-2 mb-2 w-full"
+                value={newResource.type}
+                onChange={handleNewResourceChange}
+              />
+              <input
+                type="text"
+                name="visibility"
+                placeholder="Visible To"
+                className="border p-2 mb-2 w-full"
+                value={newResource.visibility}
+                onChange={handleNewResourceChange}
+              />
+              <input
+                type="text"
+                name="createdBy"
+                placeholder="Created By"
+                className="border p-2 mb-2 w-full"
+                value={newResource.createdBy}
+                onChange={handleNewResourceChange}
+              />
+              <input
+                type="text"
+                name="format"
+                placeholder="Format"
+                className="border p-2 mb-2 w-full"
+                value={newResource.format}
+                onChange={handleNewResourceChange}
+              />
+              <div className="flex gap-2">
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  onClick={handleAddResource}
+                >
+                  Submit
+                </button>
+                <button
+                  className="bg-gray-300 px-4 py-2 rounded"
+                  onClick={() => setShowAddForm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+
             </div>
 
             {/* GLOBAL RESOURCES */}
