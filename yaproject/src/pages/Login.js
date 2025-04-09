@@ -115,12 +115,6 @@ function Login() {
             Create an account
           </Link>
         </p>
-
-        <div className="text-center mt-4">
-          <Link to="/test-header" className="text-blue-600 hover:underline">
-            Go to Test Header Page
-          </Link>
-        </div>
       </div>
 
       {showModal && (
