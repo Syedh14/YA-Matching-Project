@@ -15,6 +15,7 @@ function Resources() {
       createdBy: 'mentor',   // e.g., "mentor", "mentee"
       format: 'video',       // e.g., "video", "pdf"
       date: '2025-04-01',
+      url: 'https://www.youtube.com/watch?v=NybHckSEQBI'
     },
     {
       id: 2,
@@ -24,6 +25,7 @@ function Resources() {
       createdBy: 'mentee',
       format: 'pdf',
       date: '2025-04-02',
+      description: 'A comprehensive guide for collaborative student projects.'
     },
     {
       id: 3,
@@ -33,6 +35,7 @@ function Resources() {
       createdBy: 'mentor',
       format: 'pdf',
       date: '2025-04-03',
+      description: 'An informal guide as to how to be a better mentor.'
     },
     {
       id: 4,
@@ -42,9 +45,14 @@ function Resources() {
       createdBy: 'mentee',
       format: 'video',
       date: '2025-04-04',
+      url: 'https://www.youtube.com/watch?v=BJw5tKPP1PY'
     },
     // ... add more as needed
   ]);
+
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
 
   const [role, setRole] = useState('');
   useEffect(() => {
@@ -60,7 +68,11 @@ function Resources() {
         visibility: '',
         createdBy: '',
         format: '',
+        url: '',
+        description: '',
       });
+
+  
       
   const handleNewResourceChange = (e) => {
     setNewResource({ ...newResource, [e.target.name]: e.target.value });
@@ -72,7 +84,7 @@ function Resources() {
       date: new Date().toISOString().split('T')[0],
       ...newResource,
       createdBy: role,
-      visibility: 'my'
+      visibility: newResource.visibility,
     };
     setResources([...resources, resourceToAdd]);
     setNewResource({
@@ -80,10 +92,22 @@ function Resources() {
       type: '',
       visibility: '',
       createdBy: '',
-      format: ''
+      format: '',
+      url: '',
+      description: '',
     });
     setShowAddForm(false);
   };
+
+  const handleResourceClick = (resource) => {
+    if (resource.format === 'video' && resource.url) {
+      window.open(resource.url, '_blank');
+    } else {
+      setSelectedResource(resource);
+      setShowModal(true);
+    }
+  };
+  
     
 
   // State to hold the current filter selection
@@ -109,6 +133,58 @@ function Resources() {
   const mentorResources = myResources.filter(r => r.createdBy === 'mentor');
   const menteeResources = myResources.filter(r => r.createdBy === 'mentee');
 
+  // {showModal && selectedResource && (
+  //   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  //     <div className="bg-white rounded-lg p-6 max-w-md w-full">
+  //       <h2 className="text-xl font-bold mb-4">{selectedResource.title}</h2>
+  //       <p className="mb-4 text-gray-700">{selectedResource.description || 'No description provided.'}</p>
+  //       <button
+  //         onClick={() => setShowModal(false)}
+  //         className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+  //       >
+  //         Close
+  //       </button>
+  //     </div>
+  //   </div>
+  // )}
+  
+      {showModal && selectedResource && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+            <h2 className="text-xl font-bold mb-4">{selectedResource.title}</h2>
+            
+            <p className="text-sm text-gray-600 mb-2">Type: {selectedResource.type}</p>
+            <p className="text-sm text-gray-600 mb-2">Created by: {selectedResource.createdBy}</p>
+            <p className="text-sm text-gray-600 mb-2">Date: {selectedResource.date}</p>
+      
+            {selectedResource.description && (
+              <p className="mb-4">{selectedResource.description}</p>
+            )}
+      
+            {selectedResource.format === 'pdf' && selectedResource.url && (
+              <a 
+                href={selectedResource.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-600 underline"
+              >
+                Open PDF
+              </a>
+            )}
+      
+            <div className="flex justify-end mt-4">
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+  
+
 
   return (
     <div className="bg-white min-h-screen">
@@ -126,13 +202,12 @@ function Resources() {
             {/* MY RESOURCES */}
 
 
-
-            
             <h2 className="text-xl font-bold mb-2">My Resources</h2>
             <div className="grid grid-cols-3 gap-4 mb-6">
               {(role === 'mentor' ? mentorResources : menteeResources).map((res) => (
                 <div
                 key={res.id}
+                onClick={() => handleResourceClick(res)}
                 className="border p-16 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
                 <div className="text-gray-800 text-lg mb-2">{res.title}</div>
                 <div className="text-gray-500 text-sm">Date: {res.date}</div>
@@ -144,23 +219,6 @@ function Resources() {
             )}
             </div>
 
-{/* 
-
-              {myResources.map((res) => (
-                <div 
-                  key={res.id} 
-                  className="border p-16 flex flex-col items-center 
-                             justify-center hover:shadow-md transition-shadow"
-                >
-                  <div className="text-gray-800 text-lg mb-2">{res.title}</div>
-                  <div className="text-gray-500 text-sm">Date: {res.date}</div>
-                </div>
-              ))}
-              
-              {myResources.length === 0 && (
-                <p className="text-gray-500">No resources found.</p>
-              )} */}
-
           <button
             className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
             onClick={() => setShowAddForm(true)}
@@ -169,64 +227,87 @@ function Resources() {
           </button>
 
 
-
-          {/* Add Report Form */}
           {showAddForm && (
-            <div className="mb-4 border p-4 rounded bg-gray-100">
-              <h2 className="font-semibold text-lg mb-2">New Resource</h2>
-              <input
-                type="text"
-                name="title"
-                placeholder="Title"
-                className="border p-2 mb-2 w-full"
-                value={newResource.title}
-                onChange={handleNewResourceChange}
-              />
-              <input
-                type="text"
-                name="type"
-                placeholder="Resource Type"
-                className="border p-2 mb-2 w-full"
-                value={newResource.type}
-                onChange={handleNewResourceChange}
-              />
-              <input
-                type="text"
-                name="visibility"
-                placeholder="Visible To"
-                className="border p-2 mb-2 w-full"
-                value={newResource.visibility}
-                onChange={handleNewResourceChange}
-              />
-              <input
-                type="text"
-                name="createdBy"
-                placeholder="Created By"
-                className="border p-2 mb-2 w-full"
-                value={newResource.createdBy}
-                onChange={handleNewResourceChange}
-              />
-              <input
-                type="text"
-                name="format"
-                placeholder="Format"
-                className="border p-2 mb-2 w-full"
-                value={newResource.format}
-                onChange={handleNewResourceChange}
-              />
-              <div className="flex gap-2">
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                  onClick={handleAddResource}
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-xl font-bold mb-4">Add New Resource</h2>
+
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Title"
+                  value={newResource.title}
+                  onChange={handleNewResourceChange}
+                  className="w-full mb-3 p-2 border rounded"
+                />
+
+                <input
+                  type="text"
+                  name="type"
+                  placeholder="Type (e.g., math, science)"
+                  value={newResource.type}
+                  onChange={handleNewResourceChange}
+                  className="w-full mb-3 p-2 border rounded"
+                />
+
+                <select
+                  name="visibility"
+                  value={newResource.visibility}
+                  onChange={handleNewResourceChange}
+                  className="w-full mb-3 p-2 border rounded"
                 >
-                  Submit
-                </button>
-                <button
-                  className="bg-gray-300 px-4 py-2 rounded"
-                  onClick={() => setShowAddForm(false)}
+                  <option value="">Select Visibility</option>
+                  <option value="my">Private (My Resource)</option>
+                  <option value="global">Public (Global Resource)</option>
+                </select>
+
+                <select
+                  name="format"
+                  value={newResource.format}
+                  onChange={handleNewResourceChange}
+                  className="w-full mb-3 p-2 border rounded"
                 >
-                  Cancel
-                </button>
+                  <option value="">Select Format</option>
+                  <option value="video">Video</option>
+                  <option value="pdf">Article</option>
+                </select>
+
+                {/* Conditional fields based on format */}
+                {newResource.format === 'video' && (
+                  <input
+                    type="text"
+                    name="url"
+                    placeholder="YouTube URL"
+                    value={newResource.url}
+                    onChange={handleNewResourceChange}
+                    className="w-full mb-3 p-2 border rounded"
+                  />
+                )}
+
+                {newResource.format === 'pdf' && (
+                  <textarea
+                    name="description"
+                    placeholder="Short description of the article"
+                    value={newResource.description}
+                    onChange={handleNewResourceChange}
+                    className="w-full mb-3 p-2 border rounded"
+                  />
+                )}
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAddResource}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                  >
+                    Add
+                  </button>
+                  <button
+                    onClick={() => setShowAddForm(false)}
+                    className="ml-2 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           )}
