@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar'
+import ResourceModal from './ResourceModal';
+
 
 function Resources() {
   // Example data structure for resources
@@ -147,43 +149,7 @@ function Resources() {
   //     </div>
   //   </div>
   // )}
-  
-      {showModal && selectedResource && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-            <h2 className="text-xl font-bold mb-4">{selectedResource.title}</h2>
-            
-            <p className="text-sm text-gray-600 mb-2">Type: {selectedResource.type}</p>
-            <p className="text-sm text-gray-600 mb-2">Created by: {selectedResource.createdBy}</p>
-            <p className="text-sm text-gray-600 mb-2">Date: {selectedResource.date}</p>
-      
-            {selectedResource.description && (
-              <p className="mb-4">{selectedResource.description}</p>
-            )}
-      
-            {selectedResource.format === 'pdf' && selectedResource.url && (
-              <a 
-                href={selectedResource.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-blue-600 underline"
-              >
-                Open PDF
-              </a>
-            )}
-      
-            <div className="flex justify-end mt-4">
-              <button 
-                onClick={() => setShowModal(false)} 
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-  
+
 
 
   return (
@@ -311,6 +277,13 @@ function Resources() {
               </div>
             </div>
           )}
+
+            {showModal && selectedResource && (
+              <ResourceModal
+                resource={selectedResource}
+                onClose={() => setShowModal(false)}
+              />
+            )}
 
 
             {/* </div> */}
