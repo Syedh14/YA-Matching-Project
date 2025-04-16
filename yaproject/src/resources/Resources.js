@@ -1,5 +1,5 @@
 // src/resources/Resources.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar'
 
@@ -46,6 +46,11 @@ function Resources() {
     // ... add more as needed
   ]);
 
+  const [role, setRole] = useState('');
+  useEffect(() => {
+    const storedRole = localStorage.getItem('userRole');
+    setRole(storedRole || '');
+  }, []);
 
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -66,6 +71,7 @@ function Resources() {
       id: resources.length + 1,
       date: new Date().toISOString().split('T')[0],
       ...newResource,
+      createdBy: role,
       visibility: 'my'
     };
     setResources([...resources, resourceToAdd]);
@@ -100,6 +106,9 @@ function Resources() {
   // after they are filtered
   const myResources = filteredResources.filter(r => r.visibility === 'my');
   const globalResources = filteredResources.filter(r => r.visibility === 'global');
+  const mentorResources = myResources.filter(r => r.createdBy === 'mentor');
+  const menteeResources = myResources.filter(r => r.createdBy === 'mentee');
+
 
   return (
     <div className="bg-white min-h-screen">
@@ -115,8 +124,28 @@ function Resources() {
           {/* Scrollable container */}
           <div className="h-[80vh] overflow-y-auto border p-4">
             {/* MY RESOURCES */}
+
+
+
+            
             <h2 className="text-xl font-bold mb-2">My Resources</h2>
             <div className="grid grid-cols-3 gap-4 mb-6">
+              {(role === 'mentor' ? mentorResources : menteeResources).map((res) => (
+                <div
+                key={res.id}
+                className="border p-16 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+                <div className="text-gray-800 text-lg mb-2">{res.title}</div>
+                <div className="text-gray-500 text-sm">Date: {res.date}</div>
+                </div>
+              ))}
+
+            {(role === 'mentor' ? mentorResources : menteeResources).length === 0 && (
+              <p classname="text-gray-500">No resources found.</p>
+            )}
+            </div>
+
+{/* 
+
               {myResources.map((res) => (
                 <div 
                   key={res.id} 
@@ -130,7 +159,7 @@ function Resources() {
               
               {myResources.length === 0 && (
                 <p className="text-gray-500">No resources found.</p>
-              )}
+              )} */}
 
           <button
             className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
@@ -203,7 +232,7 @@ function Resources() {
           )}
 
 
-            </div>
+            {/* </div> */}
 
             {/* GLOBAL RESOURCES */}
             <h2 className="text-xl font-bold mb-2">Global Resources</h2>
