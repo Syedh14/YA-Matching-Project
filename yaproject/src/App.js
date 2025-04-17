@@ -11,22 +11,24 @@ import AdminDashboard from './pages/AdminDashboard';
 import MentorDashboard from './pages/MentorDashboard';
 import MenteeDashboard from './pages/MenteeDashboard';
 import Resources from './resources/Resources';
+import AdminMatches from './pages/AdminMatches';
+
+
+
 function App() {
   return (
     <Router>
       <Routes>
-        {/* The login page route */}
         <Route path="/" element={<Login />} />
         
-        {/* The route for testing the header */}
         <Route path="/test-header" element={<TestHeaderPage />} />
 
         <Route path="/" element={<Login />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin-matches" element={<AdminMatches />} />
         <Route path="/mentor" element={<MentorDashboard />} />
         <Route path="/mentee" element={<MenteeDashboard />} />
         
-        {/* Add more routes here as needed */}
         <Route path="/progress_report" element={<ProgressReports />} />
 
         <Route path="/resources" element={<Resources />} />
