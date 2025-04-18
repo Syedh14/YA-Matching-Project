@@ -34,6 +34,41 @@ const MentorDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [selectedMentee, setSelectedMentee] = useState(null);
+
+  const mentees = [
+    {
+      id: 1,
+      name: "Talaal Irtija",
+      phone: "4039999213, 4031231233",
+      email: "irtijat@gmail.com, talaal.irtija@ucalgary.ca",
+      goals: "Get better at math",
+      dateJoined: "Today",
+      skills: "PE",
+      institution: "U of C",
+    },
+    {
+      id: 2,
+      name: "Javier Singh",
+      phone: "4038881111",
+      email: "javiers@ucalgary.ca",
+      goals: "Improve programming",
+      dateJoined: "Yesterday",
+      skills: "JS, Python",
+      institution: "U of C",
+    },
+    {
+      id: 3,
+      name: "Luis Trigueros",
+      phone: "4031111111",
+      email: "luis.trigueros@ucalgary.ca",
+      goals: "Get Women",
+      dateJoined: "Never",
+      skills: "JS, Python",
+      institution: "U of C",
+    }
+  ];
+
 
   const flattenSessions = (sessions) => {
     const expanded = [];
@@ -181,49 +216,57 @@ const MentorDashboard = () => {
           </div>
         </div>
         {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg w-[36rem]">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Please Select a Mentee</h2>
-              <button
-                className="text-xl font-bold text-red-500 hover:text-secondary transition"
-                onClick={handleModalToggle}
-              >
-                X
-              </button>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-8 rounded-lg w-[36rem] max-h-[80vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">
+          {selectedMentee ? "Mentee Details" : "Please Select a Mentee"}
+        </h2>
+        <button
+          className="text-xl font-bold text-red-500 hover:text-secondary transition"
+          onClick={() => {
+            if (selectedMentee) {
+              setSelectedMentee(null); // go back to list
+            } else {
+              setIsModalOpen(false); // close modal
+            }
+          }}
+        >
+          X
+        </button>
+      </div>
+
+      {/* Show mentee list or details */}
+      {!selectedMentee ? (
+        <div className="space-y-4">
+          {mentees.map((mentee) => (
+            <div
+              key={mentee.id}
+              onClick={() => setSelectedMentee(mentee)}
+              className="cursor-pointer px-4 py-2 border rounded-lg hover:bg-primary hover:text-black transition"
+            >
+              <p className="text-lg font-medium">{mentee.name}</p>
+              <p className="text-sm text-gray-500">ID: {mentee.id}</p>
             </div>
-            <div>
-                <p className="text-lg">
-                  <span className="font-bold">User ID:</span> 3
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Name: </span> Talaal Irtija
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Phone: </span> 4039999213, 4031231233
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Email: </span>irtijat@gmail.com, talaal.irtija@ucalgary.ca
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Goals: </span>Get better at math
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Date Joined: </span>Today
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Skills: </span>PE
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Institution: </span>U of C
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Academic Status: </span>Failed
-                </p>
-            </div>
-          </div>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-lg"><span className="font-bold">User ID:</span> {selectedMentee.id}</p>
+          <p className="text-lg"><span className="font-bold">Name:</span> {selectedMentee.name}</p>
+          <p className="text-lg"><span className="font-bold">Phone:</span> {selectedMentee.phone}</p>
+          <p className="text-lg"><span className="font-bold">Email:</span> {selectedMentee.email}</p>
+          <p className="text-lg"><span className="font-bold">Goals:</span> {selectedMentee.goals}</p>
+          <p className="text-lg"><span className="font-bold">Date Joined:</span> {selectedMentee.dateJoined}</p>
+          <p className="text-lg"><span className="font-bold">Skills:</span> {selectedMentee.skills}</p>
+          <p className="text-lg"><span className="font-bold">Institution:</span> {selectedMentee.institution}</p>
+          <p className="text-lg"><span className="font-bold">Academic Status:</span> {selectedMentee.status}</p>
         </div>
       )}
+    </div>
+  </div>
+)}
+
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md relative">
