@@ -4,14 +4,14 @@ import logo from '../images/logo.png';
 import users from '../data/users';
 
 function Login() {
-  // --- Login state ---
+  
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginRole, setLoginRole]           = useState('');
   const [userId, setUserId]                 = useState('');
   const [password, setPassword]             = useState('');
   const [loginMessage, setLoginMessage]     = useState('');
 
-  // --- Create‑account state ---
+  
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [firstName, setFirstName]             = useState('');
   const [lastName, setLastName]               = useState('');
@@ -24,19 +24,19 @@ function Login() {
   const [skill, setSkill]                     = useState('');
   const [createMessage, setCreateMessage]     = useState('');
 
-  // --- Mentor popup state ---
+  
   const [showMentorPopup, setShowMentorPopup]         = useState(false);
   const [mentorAcademicStatus, setMentorAcademicStatus] = useState('');
   const [mentorActiveStatus, setMentorActiveStatus]     = useState('');
 
-  // --- Mentee popup state ---
+  
   const [showMenteePopup, setShowMenteePopup]         = useState(false);
   const [menteeInstitution, setMenteeInstitution]     = useState('');
   const [menteeAcademicStatus, setMenteeAcademicStatus] = useState('');
 
   const navigate = useNavigate();
 
-  // ---- LOGIN HANDLERS ----
+  
   const openLoginModal = role => {
     setLoginRole(role);
     setUserId('');
@@ -58,7 +58,7 @@ function Login() {
     setTimeout(() => navigate(`/${loginRole}`), 800);
   };
 
-  // ---- CREATE ACCOUNT HANDLERS ----
+  
   const openCreateModal = () => {
     setFirstName('');
     setLastName('');
@@ -74,7 +74,7 @@ function Login() {
   };
   const closeCreateModal = () => setShowCreateModal(false);
 
-  // show the mentor/mentee detail popup when role changes
+  
   useEffect(() => {
     if (newRole === 'mentor') {
       setShowMentorPopup(true);
@@ -115,14 +115,6 @@ function Login() {
       return;
     }
 
-    // TODO: submit {
-    //   firstName, lastName,
-    //   username: newUserId, password: newPassword,
-    //   role: newRole,
-    //   emails, phones, goal, skill,
-    //   ...(newRole==='mentor' ? { mentorAcademicStatus, mentorActiveStatus } : {}),
-    //   ...(newRole==='mentee' ? { menteeInstitution, menteeAcademicStatus } : {})
-    // }
     setCreateMessage('✅ Account created!');
     setTimeout(closeCreateModal, 800);
   };
@@ -141,13 +133,13 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-primary p-4">
       <div className="bg-white shadow-md rounded p-8 max-w-md w-full">
-        {/* logo + Welcome */}
+        
         <div className="flex flex-col items-center mb-6">
           <img src={logo} alt="Logo" className="w-24 h-24 mb-4" />
           <h1 className="text-3xl font-bold">Welcome!</h1>
         </div>
 
-        {/* role‑specific login */}
+        
         <div className="flex flex-col space-y-4">
           {['admin','mentor','mentee'].map(r => (
             <button
@@ -171,7 +163,7 @@ function Login() {
         </p>
       </div>
 
-      {/* LOGIN MODAL */}
+      
       {showLoginModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
@@ -211,13 +203,13 @@ function Login() {
         </div>
       )}
 
-      {/* CREATE ACCOUNT MODAL (z-40) */}
+      
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full max-h-full overflow-auto">
             <h2 className="text-2xl font-bold mb-4">Create Account</h2>
 
-            {/* Name */}
+            
             <div className="grid grid-cols-2 gap-4 mb-4">
               <input
                 type="text"
@@ -235,7 +227,7 @@ function Login() {
               />
             </div>
 
-            {/* Username & Password */}
+            
             <input
               type="text"
               placeholder="Username"
@@ -251,7 +243,7 @@ function Login() {
               onChange={e => setNewPassword(e.target.value)}
             />
 
-            {/* Role */}
+            
             <select
               className="border rounded w-full p-2 mb-4"
               value={newRole}
@@ -262,7 +254,7 @@ function Login() {
               <option value="mentee">Mentee</option>
             </select>
 
-            {/* Emails */}
+            
             <div className="mb-4">
               <label className="font-semibold">Email addresses</label>
               {emails.map((em, i) => (
@@ -294,7 +286,7 @@ function Login() {
               </button>
             </div>
 
-            {/* Phones */}
+            
             <div className="mb-4">
               <label className="font-semibold">Phone numbers</label>
               {phones.map((ph, i) => (
@@ -326,7 +318,7 @@ function Login() {
               </button>
             </div>
 
-            {/* Single Goal */}
+            
             <div className="mb-4">
               <label className="font-semibold">Goal</label>
               <input
@@ -338,7 +330,7 @@ function Login() {
               />
             </div>
 
-            {/* Single Skill */}
+            
             <div className="mb-4">
               <label className="font-semibold">Skill</label>
               <input
@@ -371,7 +363,7 @@ function Login() {
         </div>
       )}
 
-      {/* MENTOR POPUP (z-50, above create) */}
+      
       {showMentorPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
@@ -402,7 +394,7 @@ function Login() {
         </div>
       )}
 
-      {/* MENTEE POPUP (z-50, above create) */}
+     
       {showMenteePopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
