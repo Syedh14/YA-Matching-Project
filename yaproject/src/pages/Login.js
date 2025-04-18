@@ -22,20 +22,27 @@ function Login() {
   const closeModal = () => setShowModal(false);
 
   const handleLogin = () => {
-    const userList = users[role];
+    // 1) snapshot the role you clicked with
+    const currentRole = role;
+
+    // 2) look up in that slice of users
+    const userList = users[currentRole] || [];
     const userMatch = userList.find(
       (u) => u.userId === userId && u.password === password
     );
 
-    if (userMatch) {
-      setMessage('✅ Login successful!');
-      setTimeout(() => {
-        navigate(`/${role}`); // ✅ redirect based on role
-      }, 800); // delay to show the success message
-      localStorage.setItem('userRole', role);
-    } else {
+    // 3) if no match, bail early
+    if (!userMatch) {
       setMessage('❌ Invalid credentials. Please try again.');
+      return;
     }
+
+    // 4) success — persist and redirect using the same snapshot
+    setMessage('✅ Login successful!');
+    localStorage.setItem('userRole', currentRole);
+    setTimeout(() => {
+      navigate(`/${currentRole}`);
+    }, 800);
   };
 
   return (
@@ -47,9 +54,24 @@ function Login() {
         </div>
 
         <div className="flex flex-col space-y-4">
-          <button className="bg-secondary text-white font-bold py-2 px-4 rounded" onClick={() => openModal('admin')}>Admin Login</button>
-          <button className="bg-secondary text-white font-bold py-2 px-4 rounded" onClick={() => openModal('mentor')}>Mentor Login</button>
-          <button className="bg-secondary text-white font-bold py-2 px-4 rounded" onClick={() => openModal('mentee')}>Mentee Login</button>
+          <button
+            className="bg-secondary text-white font-bold py-2 px-4 rounded"
+            onClick={() => openModal('admin')}
+          >
+            Admin Login
+          </button>
+          <button
+            className="bg-secondary text-white font-bold py-2 px-4 rounded"
+            onClick={() => openModal('mentor')}
+          >
+            Mentor Login
+          </button>
+          <button
+            className="bg-secondary text-white font-bold py-2 px-4 rounded"
+            onClick={() => openModal('mentee')}
+          >
+            Mentee Login
+          </button>
         </div>
 
         <p className="mt-6 text-center">
@@ -63,7 +85,9 @@ function Login() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
-            <h2 className="text-xl font-bold mb-4 capitalize">{role} Login</h2>
+            <h2 className="text-xl font-bold mb-4 capitalize">
+              {role} Login
+            </h2>
             <input
               type="text"
               placeholder="User ID"
