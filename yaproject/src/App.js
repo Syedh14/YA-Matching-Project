@@ -1,12 +1,13 @@
-
-import Login from './Login';
+import React from 'react';
+import Profile from './Profile/profile';
 
 function App() {
   return (
     <div>
-      <Login />
+      <Profile />
     </div>
   );
 }
 
 export default App;
+
