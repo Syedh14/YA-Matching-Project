@@ -46,17 +46,38 @@ function Login() {
   };
   const closeLoginModal = () => setShowLoginModal(false);
 
+  // const handleLogin = () => {
+  //   const list = users[loginRole] || [];
+  //   const match = list.find(u => u.userId === userId && u.password === password);
+  //   if (!match) {
+  //     setLoginMessage('❌ Invalid credentials. Please try again.');
+  //     return;
+  //   }
+  //   setLoginMessage('✅ Login successful!');
+  //   localStorage.setItem('userRole', loginRole);
+  //   setTimeout(() => navigate(`/${loginRole}`), 800);
+  // };
+
   const handleLogin = () => {
-    const list = users[loginRole] || [];
-    const match = list.find(u => u.userId === userId && u.password === password);
+    const staticList = users[loginRole] || [];
+  
+    const storedUsers = JSON.parse(localStorage.getItem('customUsers') || '{}');
+    const localList = storedUsers[loginRole] || [];
+  
+    const combinedUsers = [...staticList, ...localList];
+    const match = combinedUsers.find(u => u.userId === userId && u.password === password);
+  
     if (!match) {
       setLoginMessage('❌ Invalid credentials. Please try again.');
       return;
     }
+  
     setLoginMessage('✅ Login successful!');
     localStorage.setItem('userRole', loginRole);
+    localStorage.setItem('userId', userId);
     setTimeout(() => navigate(`/${loginRole}`), 800);
   };
+  
 
   
   const openCreateModal = () => {
@@ -88,6 +109,37 @@ function Login() {
     }
   }, [newRole]);
 
+  // const handleCreateAccount = () => {
+  //   const baseInvalid =
+  //     !firstName.trim() ||
+  //     !lastName.trim() ||
+  //     !newUserId.trim() ||
+  //     !newPassword.trim() ||
+  //     !newRole ||
+  //     emails.some(e => !e.trim()) ||
+  //     phones.some(p => !p.trim()) ||
+  //     !goal.trim() ||
+  //     !skill.trim();
+
+  //   const mentorInvalid = newRole === 'mentor' && (
+  //     !mentorAcademicStatus.trim() ||
+  //     !mentorActiveStatus
+  //   );
+
+  //   const menteeInvalid = newRole === 'mentee' && (
+  //     !menteeInstitution.trim() ||
+  //     !menteeAcademicStatus.trim()
+  //   );
+
+  //   if (baseInvalid || mentorInvalid || menteeInvalid) {
+  //     setCreateMessage('❌ Please fill out all required fields (including popups).');
+  //     return;
+  //   }
+
+  //   setCreateMessage('✅ Account created!');
+  //   setTimeout(closeCreateModal, 800);
+  // };
+
   const handleCreateAccount = () => {
     const baseInvalid =
       !firstName.trim() ||
@@ -99,25 +151,56 @@ function Login() {
       phones.some(p => !p.trim()) ||
       !goal.trim() ||
       !skill.trim();
-
+  
     const mentorInvalid = newRole === 'mentor' && (
       !mentorAcademicStatus.trim() ||
       !mentorActiveStatus
     );
-
+  
     const menteeInvalid = newRole === 'mentee' && (
       !menteeInstitution.trim() ||
       !menteeAcademicStatus.trim()
     );
-
+  
     if (baseInvalid || mentorInvalid || menteeInvalid) {
-      setCreateMessage('❌ Please fill out all required fields (including popups).');
+      setCreateMessage('❌ Please fill out all required fields.');
       return;
     }
-
-    setCreateMessage('✅ Account created!');
-    setTimeout(closeCreateModal, 800);
+  
+    const newUser = {
+      userId: newUserId,
+      password: newPassword,
+      firstName,
+      lastName,
+      emails,
+      phones,
+      goal,
+      skill,
+      role: newRole,
+      ...(newRole === 'mentor' && {
+        academicStatus: mentorAcademicStatus,
+        activeStatus: mentorActiveStatus
+      }),
+      ...(newRole === 'mentee' && {
+        institution: menteeInstitution,
+        academicStatus: menteeAcademicStatus
+      })
+    };
+  
+    // Save to localStorage
+    const storedUsers = JSON.parse(localStorage.getItem('customUsers') || '{}');
+    const roleGroup = storedUsers[newRole] || [];
+    roleGroup.push(newUser);
+    storedUsers[newRole] = roleGroup;
+    localStorage.setItem('customUsers', JSON.stringify(storedUsers));
+  
+    setCreateMessage('✅ Account created successfully!');
+    setTimeout(() => {
+      closeCreateModal();
+      openLoginModal(newRole);
+    }, 1000);
   };
+  
 
   // dynamic-list helpers
   const makeListHelpers = (arr, setArr) => ({
