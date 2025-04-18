@@ -4,13 +4,20 @@ import Header from '../components/Header';
 const days = ["MON", "TUES", "WED", "THURS", "FRI", "SAT", "SUN"];
 const times = [
   "8 am",
+  "9 am",
   "10 am",
+  "11 am",
   "12 pm",
+  "1 pm",
   "2 pm",
+  "3 pm",
   "4 pm",
+  "5 pm",
   "6 pm",
+  "7 pm",
   "8 pm"
 ];
+
 
 const sessionsList = [
   { day: "MON", time: "12 pm", type: "session", name: "In-Person", length: 2 },
@@ -29,7 +36,31 @@ const MenteeDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [sessions, setSessions] = useState(sessionsList);
+
+  const flattenSessions = (sessions) => {
+    const expanded = [];
+    sessions.forEach((session, index) => {
+      const sessionId = `${session.day}-${session.time}-${index}`; // unique ID
+      const startIndex = times.indexOf(session.time);
+      for (let i = 0; i < session.length; i++) {
+        const timeSlot = times[startIndex + i];
+        if (timeSlot) {
+          expanded.push({
+            ...session,
+            time: timeSlot,
+            isTopBlock: i === 0,
+            sessionId: sessionId,
+            indexInSession: i,
+          });
+        }
+      }
+    });
+    return expanded;
+  };
+  
+
+
+  const [sessions, setSessions] = useState(flattenSessions(sessionsList));
   const [newSession, setNewSession] = useState({
     day: "MON",
     time: "8 am",
@@ -38,47 +69,74 @@ const MenteeDashboard = () => {
     length: 1,
   });
   
+  
 
   const getSession = (day, time) =>
   sessions.find((s) => s.day === day && s.time === time);
 
   const SessionCell = ({ session, editMode, onDelete }) => {
-    const baseStyles = "w-full h-16 flex items-center justify-center text-sm font-medium border-x box-border relative";
-    if (!session) return <div className={baseStyles} />;
+    const baseStyles =
+      "w-full h-16 flex items-center justify-center text-sm font-medium border-x border-b box-border relative";
+  
+    // Empty cell with default vertical borders
+    if (!session) return <div className={`${baseStyles} border-gray-300`} />;
+  
+    const isStackedBlock = session.length > 1 && session.indexInSession > 0;
+  
+    // Use background-matching border color for inner stacked blocks
+    const bgClass =
+      session.type === "session" ? "bg-secondary text-white" : "bg-primary text-black";
+  
+    const topBorderColorClass = isStackedBlock
+      ? session.type === "session"
+        ? "border-t-secondary"
+        : "border-t-primary"
+      : "border-t border-gray-300";
+  
     return (
       <div
-        className={`${baseStyles} ${
-          session.type === "session"
-            ? "bg-secondary text-white border box-border"
-            : "bg-primary text-black border box-border"
-        }`}
+        className={`${baseStyles} ${bgClass} ${topBorderColorClass}`}
       >
-        {editMode && (
+        {editMode && session.isTopBlock && (
           <button
             onClick={() => onDelete(session.day, session.time)}
-            className="absolute top-1 right-1 text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-500"
+            className="absolute top-1 right-1 text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
           >
             ×
           </button>
         )}
-        {session.name}
+        {session.isTopBlock ? session.name : ""}
       </div>
     );
   };
+  
+  
+  
 
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);
   };
 
   const handleDeleteSession = (day, time) => {
-    setSessions((prev) => prev.filter((s) => !(s.day === day && s.time === time)));
+    const sessionToDelete = sessions.find(s => s.day === day && s.time === time && s.isTopBlock);
+    if (!sessionToDelete) return;
+  
+    setSessions((prev) =>
+      prev.filter(
+        (s) =>
+          !(s.day === day &&
+            times.indexOf(s.time) >= times.indexOf(sessionToDelete.time) &&
+            times.indexOf(s.time) < times.indexOf(sessionToDelete.time) + sessionToDelete.length)
+      )
+    );
   };
+  
 
   return (
     <div>
       <Header />
       <div className="p-8 min-h-full">
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mt-24">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
           <div className="flex-1">
             <div className="grid grid-cols-[100px_repeat(7,minmax(0,1fr))] gap-0 bg-white p-0 rounded-xl border border-gray-300 shadow-lg shadow-primary w-full overflow-hidden">
               <div className="border border-gray-300 box-border bg-gray-100"></div>
@@ -251,10 +309,18 @@ const MenteeDashboard = () => {
 
               <button
                 onClick={() => {
-                  sessions.push(newSession); // You'll later replace this with a DB call
                   setShowModal(false);
-                  setNewSession({ day: "MON", time: "8 am", type: "session", name: "", length: 1 });
+                  const newFlattened = flattenSessions([newSession]);
+                  setSessions((prev) => [...prev, ...newFlattened]);
+                  setNewSession({
+                    day: "MON",
+                    time: "8 am",
+                    type: "session",
+                    name: "In-Person",
+                    length: 1,
+                  });
                 }}
+                
                 className="mt-4 w-full bg-secondary text-white py-2 px-4 rounded hover:bg-primary hover:text-black transition"
               >
                 Save Session
