@@ -71,14 +71,19 @@ function Login() {
       setLoginMessage('❌ Invalid credentials. Please try again.');
       return;
     }
-  
+
+      // Build full user data including role-specific fields
+    const userData = {
+      ...match,
+      role: loginRole
+    };
+    
     setLoginMessage('✅ Login successful!');
     localStorage.setItem('userRole', loginRole);
-    localStorage.setItem('userId', userId);
+    localStorage.setItem('loggedInUser', JSON.stringify(userData));  
     setTimeout(() => navigate(`/${loginRole}`), 800);
   };
   
-
   
   const openCreateModal = () => {
     setFirstName('');
