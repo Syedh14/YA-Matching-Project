@@ -12,7 +12,7 @@ const times = [
   "8 pm"
 ];
 
-const sessions = [
+const sessionsList = [
   { day: "MON", time: "12 pm", type: "session", name: "In-Person", length: 2 },
   { day: "MON", time: "4 pm", type: "session", name: "Online", length: 1 },
   { day: "MON", time: "6 pm", type: "session", name: "In-Person", length: 1 },
@@ -24,11 +24,26 @@ const sessions = [
   { day: "SUN", time: "4 pm", type: "session", name: "Online", length: 1 }
 ];
 
-const getSession = (day, time) =>
+  
+const MenteeDashboard = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [sessions, setSessions] = useState(sessionsList);
+  const [newSession, setNewSession] = useState({
+    day: "MON",
+    time: "8 am",
+    type: "session",
+    name: "In-Person",
+    length: 1,
+  });
+  
+
+  const getSession = (day, time) =>
   sessions.find((s) => s.day === day && s.time === time);
 
-  const SessionCell = ({ session }) => {
-    const baseStyles = "w-full h-16 flex items-center justify-center text-sm font-medium border-x box-border";
+  const SessionCell = ({ session, editMode, onDelete }) => {
+    const baseStyles = "w-full h-16 flex items-center justify-center text-sm font-medium border-x box-border relative";
     if (!session) return <div className={baseStyles} />;
     return (
       <div
@@ -38,16 +53,25 @@ const getSession = (day, time) =>
             : "bg-primary text-black border box-border"
         }`}
       >
+        {editMode && (
+          <button
+            onClick={() => onDelete(session.day, session.time)}
+            className="absolute top-1 right-1 text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-500"
+          >
+            ×
+          </button>
+        )}
         {session.name}
       </div>
     );
   };
-  
-const MenteeDashboard = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  const handleDeleteSession = (day, time) => {
+    setSessions((prev) => prev.filter((s) => !(s.day === day && s.time === time)));
   };
 
   return (
@@ -76,15 +100,27 @@ const MenteeDashboard = () => {
                     <SessionCell
                       key={`${day}-${time}`}
                       session={getSession(day, time)}
+                      editMode={editMode}
+                      onDelete={handleDeleteSession}
                     />
                   ))}
                 </React.Fragment>
               ))}
             </div>
 
-            <div className="flex justify-center mt-6">
-              <button className="px-6 py-3 text-lg border rounded hover:bg-primary hover:text-black transition bg-secondary text-white w-32">
-                Edit
+            <div className="flex justify-center mt-6 gap-4">
+              <button
+                onClick={() => setEditMode((prev) => !prev)}
+                className="px-6 py-3 text-lg border rounded hover:bg-primary hover:text-black transition bg-secondary text-white w-32"
+              >
+                {editMode ? "Done" : "Edit"}
+              </button>
+
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-6 py-3 text-lg border rounded hover:bg-primary hover:text-black transition bg-secondary text-white w-40"
+              >
+                Add Session
               </button>
             </div>
           </div>
@@ -134,6 +170,95 @@ const MenteeDashboard = () => {
                 <p className="text-lg mt-2">
                   <span className="font-bold">Academic Status: </span>Failed
                 </p>
+            </div>
+          </div>
+        </div>
+      )}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl font-bold"
+              onClick={() => setShowModal(false)}
+            >
+              &times;
+            </button>
+
+            <h3 className="text-xl font-semibold mb-4">Add New Session</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-1 font-medium">Day</label>
+                <select
+                  value={newSession.day}
+                  onChange={(e) => setNewSession({ ...newSession, day: e.target.value })}
+                  className="w-full border rounded p-2"
+                >
+                  {["MON", "TUES", "WED", "THURS", "FRI", "SAT", "SUN"].map((day) => (
+                    <option key={day} value={day}>{day}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Time</label>
+                <select
+                  value={newSession.time}
+                  onChange={(e) => setNewSession({ ...newSession, time: e.target.value })}
+                  className="w-full border rounded p-2"
+                >
+                  {times.map((time) => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Type</label>
+                <select
+                  value={newSession.type}
+                  onChange={(e) => setNewSession({ ...newSession, type: e.target.value })}
+                  className="w-full border rounded p-2"
+                >
+                  <option value="session">Confirmed</option>
+                  <option value="possible">Possible</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Name</label>
+                <select
+                  value={newSession.name}
+                  onChange={(e) => setNewSession({ ...newSession, name: e.target.value })}
+                  className="w-full border rounded p-2"
+                >
+                  <option value="In-Person">In-Person</option>
+                  <option value="Online">Online</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Length (hours)</label>
+                <input
+                  type="number"
+                  value={newSession.length}
+                  min={1}
+                  max={4}
+                  onChange={(e) => setNewSession({ ...newSession, length: parseInt(e.target.value) })}
+                  className="w-full border rounded p-2"
+                />
+              </div>
+
+              <button
+                onClick={() => {
+                  sessions.push(newSession); // You'll later replace this with a DB call
+                  setShowModal(false);
+                  setNewSession({ day: "MON", time: "8 am", type: "session", name: "", length: 1 });
+                }}
+                className="mt-4 w-full bg-secondary text-white py-2 px-4 rounded hover:bg-primary hover:text-black transition"
+              >
+                Save Session
+              </button>
             </div>
           </div>
         </div>
