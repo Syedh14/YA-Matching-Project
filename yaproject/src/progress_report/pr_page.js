@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header'; 
 import ProgressReportModal from './progressreportmodal';
+import axios from 'axios';
 
 function ProgressReports() {
     const [selectedReport, setSelectedReport] = useState(null);
@@ -109,10 +110,38 @@ function ProgressReports() {
       challenges: '',
     });
     
-    useEffect(() => {
-      const storedRole = localStorage.getItem('userRole');
-      setRole(storedRole || '');
-    }, []);
+    // useEffect(() => {
+    //   const storedRole = localStorage.getItem('userRole');
+    //   setRole(storedRole || '');
+    // }, []);
+
+     // Fetch user role from backend
+        useEffect(() => {
+          const fetchRole = async () => {
+            try {
+              const response = await axios.get('http://localhost:5001/auth/user');
+              setRole(response.data.role);
+            } catch (error) {
+              console.error('Error fetching user role', error);
+            }
+          };
+
+          fetchRole();
+        }, []);
+
+        // Fetch reports from backend
+        useEffect(() => {
+          const fetchReports = async () => {
+            try {
+              const response = await axios.get('http://localhost:5001/progress-reports');
+              setReports(response.data);
+            } catch (error) {
+              console.error('Error fetching progress reports', error);
+            }
+          };
+
+          fetchReports();
+        }, []);
 
   
     const handleCardClick = (report) => {
@@ -125,15 +154,26 @@ function ProgressReports() {
       setShowModal(false);
     };
   
-   const sortedReports = [...reports].sort((a, b) => {
-      if (sortBy === 'id') {
-        // Sort by ID (ascending)
-        return a.id - b.id;
-      } else {
-        // Sort by Date (ascending)
-        return new Date(a.date) - new Date(b.date);
-      }
-    });
+  //  const sortedReports = [...reports].sort((a, b) => {
+  //     if (sortBy === 'id') {
+  //       // Sort by ID (ascending)
+  //       return a.id - b.id;
+  //     } else {
+  //       // Sort by Date (ascending)
+  //       return new Date(a.date) - new Date(b.date);
+  //     }
+  //   });
+
+      const sortedReports = [...reports].sort((a, b) => {
+        if (sortBy === 'date') {
+          return new Date(b.date) - new Date(a.date);
+        } else if (sortBy === 'topic') {
+          return a.topic.localeCompare(b.topic);
+        } else {
+          return a.id - b.id;
+        }
+      });
+
   
       // NEW: Handle the "Sort By" button click
     // Toggles between 'id' and 'date'
@@ -146,20 +186,41 @@ function ProgressReports() {
       setNewReport({ ...newReport, [e.target.name]: e.target.value });
     };
   
-    const handleAddReport = () => {
+    // const handleAddReport = () => {
+    //   const reportToAdd = {
+    //     id: reports.length + 1,
+    //     date: new Date().toISOString().split('T')[0],
+    //     ...newReport,
+    //   };
+    //   setReports([...reports, reportToAdd]);
+    //   setNewReport({
+    //     topic: '',
+    //     areasOfImprovement: '',
+    //     skillsImproved: '',
+    //     challenges: '',
+    //   });
+    //   setShowAddForm(false);
+    // };
+
+    const handleAddReport = async () => {
       const reportToAdd = {
-        id: reports.length + 1,
-        date: new Date().toISOString().split('T')[0],
         ...newReport,
+        date: new Date().toISOString().split('T')[0],
       };
-      setReports([...reports, reportToAdd]);
-      setNewReport({
-        topic: '',
-        areasOfImprovement: '',
-        skillsImproved: '',
-        challenges: '',
-      });
-      setShowAddForm(false);
+  
+      try {
+        const response = await axios.post('http://localhost:5001/progress-reports', reportToAdd);
+        setReports(prev => [...prev, response.data]);
+        setNewReport({
+          topic: '',
+          areasOfImprovement: '',
+          skillsImproved: '',
+          challenges: '',
+        });
+        setShowAddForm(false);
+      } catch (error) {
+        console.error('Error adding report', error);
+      }
     };
   
 return (
