@@ -2,18 +2,25 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../images/logo.png';
+import axios from 'axios';
 
 const Header = () => {
   const location = useLocation();
-  const [role, setRole] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    
-    setRole(localStorage.getItem('userRole'));
+    axios.get("http://localhost:5001/auth/profile", { withCredentials: true })
+    .then(res => {
+      setUser(res.data);  
+    })
+    .catch(err => {
+      console.error("Failed to fetch profile data", err);
+      setUser(null);
+    });
   }, []);
 
   
-  if (!role) return null;
+  if (!user) return null;
 
   const adminLinks = [
     { name: 'Home', path: '/admin' },
@@ -22,13 +29,13 @@ const Header = () => {
   ];
 
   const mentorMenteeLinks = [
-    { name: 'Home', path: `/${role}` },          // '/mentor' or '/mentee'
+    { name: 'Home', path: `/${user.role}` },          // '/mentor' or '/mentee'
     { name: 'Progress Reports', path: '/progress_report' },
     { name: 'Resources', path: '/resources' },
     { name: 'Profile', path: '/profile' },
   ];
 
-  const navLinks = role === 'admin' ? adminLinks : mentorMenteeLinks;
+  const navLinks = user.role === 'admin' ? adminLinks : mentorMenteeLinks;
 
   return (
     <nav className="flex items-center justify-between p-6 border-b border-black">
