@@ -43,16 +43,20 @@ function Login() {
 
   const handleLogin = async () => {
     try {
+      const formattedRole = loginRole.charAt(0).toUpperCase() + loginRole.slice(1);
       const response = await axios.post("http://localhost:5001/auth/login", {
-        username: userId,
-        password: password
-      });
+        username: userId.trim(),
+        password: password.trim(),
+        role: formattedRole
+      },
+      {withCredentials: true }
+    );
   
-      const user = response.data.user;
+    //const userRole = response.data.user.role;
   
       // ✅ Use role from backend, not selected role
       setLoginMessage("Login successful!");
-      setTimeout(() => navigate(`/${user.role}`), 800); // e.g. '/Admin', '/Mentor', '/Mentee'
+      navigate(`/${formattedRole.toLowerCase()}`); // e.g. '/Admin', '/Mentor', '/Mentee'
       
       // Optional: If you need to pass user info to other components, use state/context instead
       // setUser(user);
