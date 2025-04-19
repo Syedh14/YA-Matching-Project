@@ -1,5 +1,4 @@
 
-// src/pages/Profile.jsx
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import axios from 'axios';
@@ -8,10 +7,9 @@ function Profile() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Fetch profile data from the server using the session (cookie)
     axios.get("http://localhost:5001/auth/profile", { withCredentials: true })
       .then(res => {
-        setUser(res.data);  // res.data contains the profile object from the server
+        setUser(res.data);  
       })
       .catch(err => {
         console.error("Failed to fetch profile data", err);
@@ -35,7 +33,11 @@ function Profile() {
 
           {/* Profile Info Header */}
           <div className="flex flex-col items-center mb-4">
-            <div className="w-40 h-40 rounded-full border border-gray-400 mb-4" />
+            <img
+              src="/profile.png"
+              alt="Profile"
+              className="w-40 h-40 rounded-full border border-gray-400 mb-4 object-cover"
+            />
             <h2 className="text-xl font-semibold">
               {user.firstName} {user.lastName}
             </h2>
@@ -52,10 +54,12 @@ function Profile() {
             <p className="text-md font-medium">
               📧 Email(s): {user.emails?.join(', ') || 'N/A'}
             </p>
-            {/* Shared profile attributes */}
-            <p className="text-md font-medium">🎯 Goal: {user.goal || 'N/A'}</p>
-            <p className="text-md font-medium">🛠 Skill: {user.skill || 'N/A'}</p>
-
+            {user.role !== 'admin' && (
+              <>
+                <p className="text-md font-medium">🎯 Goal: {user.goal || 'N/A'}</p>
+                <p className="text-md font-medium">🛠 Skill: {user.skill || 'N/A'}</p>
+              </>
+            )}
             {/* Role-specific fields */}
             {user.role === 'mentor' && (
               <>
