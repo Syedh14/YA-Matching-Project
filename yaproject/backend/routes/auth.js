@@ -163,11 +163,15 @@ router.get("/profile", (req, res) => {
   
     const userSql = `
       SELECT 
+        user_id,
+        username,
+        password,
         first_name AS firstName,
         last_name  AS lastName
       FROM Users
       WHERE user_id = ?;
     `;
+
   
     const emailsSql = "SELECT email FROM Emails WHERE user_id = ?;";
     const phonesSql = "SELECT phone FROM Phones WHERE user_id = ?;";

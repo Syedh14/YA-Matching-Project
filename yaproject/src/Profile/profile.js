@@ -71,6 +71,15 @@ function Profile() {
           {/* Contact Info and Common Fields */}
           <div className="space-y-3 text-left">
             <p className="text-md font-medium">
+              ID: {user.user_id || 'N/A'}
+            </p>
+            <p className="text-md font-medium">
+              Username: {user.username || 'N/A'}
+            </p>
+            <p className="text-md font-medium">
+              Password: {user.password || 'N/A'}
+            </p>
+            <p className="text-md font-medium">
               📞 Phone(s): {user.phones?.join(', ') || 'N/A'}
             </p>
             <p className="text-md font-medium">
