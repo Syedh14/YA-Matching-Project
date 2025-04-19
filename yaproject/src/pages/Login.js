@@ -1,43 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../images/logo.png';
-
 import axios from 'axios';
 
 function Login() {
-  
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [loginRole, setLoginRole]           = useState('');
-  const [userId, setUserId]                 = useState('');
-  const [password, setPassword]             = useState('');
-  const [loginMessage, setLoginMessage]     = useState('');
+  const [loginRole, setLoginRole] = useState('');
+  const [userId, setUserId] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginMessage, setLoginMessage] = useState('');
 
-  
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [firstName, setFirstName]             = useState('');
-  const [lastName, setLastName]               = useState('');
-  const [newUserId, setNewUserId]             = useState('');
-  const [newPassword, setNewPassword]         = useState('');
-  const [newRole, setNewRole]                 = useState('');
-  const [emails, setEmails]                   = useState(['']);
-  const [phones, setPhones]                   = useState(['']);
-  const [goal, setGoal]                       = useState('');
-  const [skill, setSkill]                     = useState('');
-  const [createMessage, setCreateMessage]     = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [newUserId, setNewUserId] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newRole, setNewRole] = useState('');
+  const [emails, setEmails] = useState(['']);
+  const [phones, setPhones] = useState(['']);
+  const [goal, setGoal] = useState('');
+  const [skill, setSkill] = useState('');
+  const [createMessage, setCreateMessage] = useState('');
 
-  
-  const [showMentorPopup, setShowMentorPopup]         = useState(false);
+  const [showMentorPopup, setShowMentorPopup] = useState(false);
   const [mentorAcademicStatus, setMentorAcademicStatus] = useState('');
-  const [mentorActiveStatus, setMentorActiveStatus]     = useState('');
+  const [mentorActiveStatus, setMentorActiveStatus] = useState('');
 
-  
-  const [showMenteePopup, setShowMenteePopup]         = useState(false);
-  const [menteeInstitution, setMenteeInstitution]     = useState('');
+  const [showMenteePopup, setShowMenteePopup] = useState(false);
+  const [menteeInstitution, setMenteeInstitution] = useState('');
   const [menteeAcademicStatus, setMenteeAcademicStatus] = useState('');
 
   const navigate = useNavigate();
 
-  
   const openLoginModal = role => {
     setLoginRole(role);
     setUserId('');
@@ -50,23 +44,16 @@ function Login() {
   const handleLogin = async () => {
     try {
       const response = await axios.post("http://localhost:5000/auth/login", {
-        username: userId,   
+        username: userId,
         password: password
       });
-  
+
       const user = response.data.user;
-  
-      const userData = {
-        ...user,
-        role: loginRole 
-      };
-  
+      const userData = { ...user, role: loginRole };
       setLoginMessage("Login successful!");
       localStorage.setItem("userRole", loginRole);
       localStorage.setItem("loggedInUser", JSON.stringify(userData));
-  
       setTimeout(() => navigate(`/${loginRole}`), 800);
-  
     } catch (error) {
       if (error.response && error.response.status === 401) {
         setLoginMessage("Invalid credentials. Please try again.");
@@ -76,10 +63,7 @@ function Login() {
       }
     }
   };
-  
-  
-  
-  
+
   const openCreateModal = () => {
     setFirstName('');
     setLastName('');
@@ -95,12 +79,12 @@ function Login() {
   };
   const closeCreateModal = () => setShowCreateModal(false);
 
-  
+  // display the mentor/mentee popup based on the exact casing
   useEffect(() => {
-    if (newRole === 'mentor') {
+    if (newRole === 'Mentor') {
       setShowMentorPopup(true);
       setShowMenteePopup(false);
-    } else if (newRole === 'mentee') {
+    } else if (newRole === 'Mentee') {
       setShowMenteePopup(true);
       setShowMentorPopup(false);
     } else {
@@ -109,9 +93,8 @@ function Login() {
     }
   }, [newRole]);
 
-  
-
   const handleCreateAccount = async () => {
+    // basic validation
     const baseInvalid =
       !firstName.trim() ||
       !lastName.trim() ||
@@ -119,70 +102,71 @@ function Login() {
       !newPassword.trim() ||
       !newRole ||
       emails.some(e => !e.trim()) ||
-      phones.some(p => !p.trim())||
+      phones.some(p => !p.trim()) ||
       !goal.trim() ||
       !skill.trim();
-  
-    const mentorInvalid = newRole === "mentor" && (
-      !mentorAcademicStatus.trim() || 
-      !mentorActiveStatus
-    );
-  
-    const menteeInvalid = newRole === "mentee" && (
-      !menteeInstitution.trim() ||
-      !menteeAcademicStatus.trim()
-    );
-  
-    if (baseInvalid ||mentorInvalid || menteeInvalid) {
+
+    const mentorInvalid =
+      newRole === "Mentor" &&
+      (!mentorAcademicStatus.trim() || !mentorActiveStatus);
+
+    const menteeInvalid =
+      newRole === "Mentee" &&
+      (!menteeInstitution.trim() || !menteeAcademicStatus.trim());
+
+    if (baseInvalid || mentorInvalid || menteeInvalid) {
       setCreateMessage("Please fill out all required fields.");
       return;
     }
-  
+
     const newUser = {
       username: newUserId,
       password: newPassword,
       firstName,
       lastName,
+      role: newRole,            // must be "Mentor" or "Mentee"
       emails,
       phones,
-      goal,
-      skill,
-      role: newRole,
-      ...(newRole === "mentor" && {
-        academicStatus: mentorAcademicStatus,
-        activeStatus: mentorActiveStatus
+      goals: goal,              // backend expects `goals`
+      skills: skill,            // backend expects `skills`
+      ...(newRole === "Mentor" && {
+        //activeStatus: mentorActiveStatus,
+        activeStatus: mentorActiveStatus === "active",
+        academicBackground: mentorAcademicStatus // backend expects `academicBackground`
       }),
-      ...(newRole === "mentee" && {
+      ...(newRole === "Mentee" && {
         institution: menteeInstitution,
-        academicStatus: menteeAcademicStatus
+        academicStatus: menteeAcademicStatus     // backend expects `academicStatus`
       })
     };
-  
+
     try {
       const response = await axios.post("http://localhost:5000/auth/signup", newUser);
 
-      if (!response.status !== 201) {
-        throw new Error(response.data.error || "Something went wrong");
+      // correctly detect HTTP 201 Created
+      if (response.status === 201) {
+        setCreateMessage("Account created successfully!");
+        setTimeout(() => {
+          closeCreateModal();
+          openLoginModal(newRole);
+        }, 1000);
+      } else {
+        setCreateMessage(response.data.error || "Something went wrong");
       }
-  
-      setCreateMessage("Account created successfully!");
-      setTimeout(() => {
-        closeCreateModal();
-        openLoginModal(newRole);
-      }, 1000);
     } catch (error) {
       setCreateMessage("Failed to create account.");
       console.error(error);
     }
   };
-  
 
-  // dynamic-list helpers
+  // helpers for dynamic email/phone lists
   const makeListHelpers = (arr, setArr) => ({
     update: (i, val) => {
-      const copy = [...arr]; copy[i] = val; setArr(copy);
+      const copy = [...arr];
+      copy[i] = val;
+      setArr(copy);
     },
-    add:    () => setArr([...arr, '']),
+    add: () => setArr([...arr, '']),
     remove: i => setArr(arr.filter((_, idx) => idx !== i)),
   });
   const emailHelpers = makeListHelpers(emails, setEmails);
@@ -191,15 +175,13 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-primary p-4">
       <div className="bg-white shadow-md rounded p-8 max-w-md w-full">
-        
         <div className="flex flex-col items-center mb-6">
           <img src={logo} alt="Logo" className="w-24 h-24 mb-4" />
           <h1 className="text-3xl font-bold">Welcome!</h1>
         </div>
 
-        
         <div className="flex flex-col space-y-4">
-          {['admin','mentor','mentee'].map(r => (
+          {['admin', 'mentor', 'mentee'].map(r => (
             <button
               key={r}
               className="bg-secondary text-white py-2 px-4 rounded font-bold"
@@ -221,7 +203,7 @@ function Login() {
         </p>
       </div>
 
-      
+      {/* LOGIN MODAL */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
@@ -261,13 +243,11 @@ function Login() {
         </div>
       )}
 
-      
+      {/* CREATE ACCOUNT MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full max-h-full overflow-auto">
             <h2 className="text-2xl font-bold mb-4">Create Account</h2>
-
-            
             <div className="grid grid-cols-2 gap-4 mb-4">
               <input
                 type="text"
@@ -284,8 +264,6 @@ function Login() {
                 onChange={e => setLastName(e.target.value)}
               />
             </div>
-
-            
             <input
               type="text"
               placeholder="Username"
@@ -300,19 +278,17 @@ function Login() {
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
             />
-
-            
             <select
               className="border rounded w-full p-2 mb-4"
               value={newRole}
               onChange={e => setNewRole(e.target.value)}
             >
               <option value="">Select role…</option>
-              <option value="mentor">Mentor</option>
-              <option value="mentee">Mentee</option>
+              <option value="Mentor">Mentor</option>
+              <option value="Mentee">Mentee</option>
             </select>
 
-            
+            {/* Emails */}
             <div className="mb-4">
               <label className="font-semibold">Email addresses</label>
               {emails.map((em, i) => (
@@ -344,7 +320,7 @@ function Login() {
               </button>
             </div>
 
-            
+            {/* Phones */}
             <div className="mb-4">
               <label className="font-semibold">Phone numbers</label>
               {phones.map((ph, i) => (
@@ -376,7 +352,7 @@ function Login() {
               </button>
             </div>
 
-            
+            {/* Goal & Skill */}
             <div className="mb-4">
               <label className="font-semibold">Goal</label>
               <input
@@ -387,8 +363,6 @@ function Login() {
                 onChange={e => setGoal(e.target.value)}
               />
             </div>
-
-            
             <div className="mb-4">
               <label className="font-semibold">Skill</label>
               <input
@@ -400,9 +374,7 @@ function Login() {
               />
             </div>
 
-            {createMessage && (
-              <p className="text-sm mb-3">{createMessage}</p>
-            )}
+            {createMessage && <p className="text-sm mb-3">{createMessage}</p>}
             <div className="flex justify-end space-x-2">
               <button
                 className="bg-gray-300 px-4 py-2 rounded"
@@ -421,14 +393,14 @@ function Login() {
         </div>
       )}
 
-      
+      {/* Mentor popup */}
       {showMentorPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
             <h3 className="text-xl font-bold mb-4">Mentor Details</h3>
             <input
               type="text"
-              placeholder="Academic Status"
+              placeholder="Academic Background"
               className="border rounded w-full p-2 mb-3"
               value={mentorAcademicStatus}
               onChange={e => setMentorAcademicStatus(e.target.value)}
@@ -452,7 +424,7 @@ function Login() {
         </div>
       )}
 
-     
+      {/* Mentee popup */}
       {showMenteePopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
