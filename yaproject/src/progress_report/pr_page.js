@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header'; 
 import ProgressReportModal from './progressreportmodal';
+import axios from 'axios';
 
 function ProgressReports() {
     const [selectedReport, setSelectedReport] = useState(null);
@@ -20,7 +21,7 @@ function ProgressReports() {
       {
         id: 2,
         date: '2025-03-08',
-        topic: 'Science Project',
+        topic: 'Science Project', 
         areasOfImprovement: 'Research, Documentation',
         skillsImproved: 'Experimentation, Data Analysis',
         challenges: 'Resource gathering, time constraints',
@@ -110,8 +111,20 @@ function ProgressReports() {
     });
     
     useEffect(() => {
-      const storedRole = localStorage.getItem('userRole');
-      setRole(storedRole || '');
+      // On component mount, fetch the current user session info
+      axios.get("http://localhost:5001/auth/me", { withCredentials: true })
+        .then(res => {
+          if (res.data.role) {
+            // Set role from session (make sure it matches expected format)
+            setRole(res.data.role.toLowerCase()); 
+          } else {
+            setRole('');
+          }
+        })
+        .catch(err => {
+          console.error("Failed to fetch session role", err);
+          setRole('');
+        });
     }, []);
 
   

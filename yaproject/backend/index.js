@@ -1,15 +1,31 @@
 import express from "express";
-
+import session from "express-session";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
+const SECRET = process.env.SECRET;
+
 const app = express();
-app.use(cors());
-app.use(express.json()); // for parsing JSON bodies
+app.use(cors({
+    origin: 'http://localhost:3000',  
+    credentials: true              
+  }));
+  app.use(session({
+    secret: `${SECRET}`,          
+    resave: false,                    
+    saveUninitialized: false,        
+    cookie: {
+      httpOnly: true,        
+      secure: false,      
+      sameSite: 'lax' 
+    }
+  }));
+app.use(express.json());
 app.use("/auth", authRoutes);
+
 
 
 

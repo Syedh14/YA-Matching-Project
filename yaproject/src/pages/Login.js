@@ -43,19 +43,16 @@ function Login() {
 
   const handleLogin = async () => {
     try {
+      const formattedRole = loginRole.charAt(0).toUpperCase() + loginRole.slice(1);
       const response = await axios.post("http://localhost:5001/auth/login", {
-        username: userId,
-        password: password
-      });
-  
-      const user = response.data.user;
-  
-      // ✅ Use role from backend, not selected role
+        username: userId.trim(),
+        password: password.trim(),
+        role: formattedRole
+      },
+      {withCredentials: true }
+    );  
       setLoginMessage("Login successful!");
-      setTimeout(() => navigate(`/${user.role}`), 800); // e.g. '/Admin', '/Mentor', '/Mentee'
-      
-      // Optional: If you need to pass user info to other components, use state/context instead
-      // setUser(user);
+      navigate(`/${formattedRole.toLowerCase()}`);
   
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -128,19 +125,18 @@ function Login() {
       password: newPassword,
       firstName,
       lastName,
-      role: newRole,            // must be "Mentor" or "Mentee"
+      role: newRole,           
       emails,
       phones,
-      goals: goal,              // backend expects `goals`
-      skills: skill,            // backend expects `skills`
+      goals: goal,            
+      skills: skill,            
       ...(newRole === "Mentor" && {
-        //activeStatus: mentorActiveStatus,
         activeStatus: mentorActiveStatus === "active",
-        academicBackground: mentorAcademicStatus // backend expects `academicBackground`
+        academicBackground: mentorAcademicStatus 
       }),
       ...(newRole === "Mentee" && {
         institution: menteeInstitution,
-        academicStatus: menteeAcademicStatus     // backend expects `academicStatus`
+        academicStatus: menteeAcademicStatus 
       })
     };
 

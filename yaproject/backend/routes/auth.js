@@ -5,26 +5,43 @@ const router = express.Router();
 
 
 router.post("/login", (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, role} = req.body;
   
     const query = `
       SELECT * FROM Users 
-      WHERE username = ? AND password = ?`
+      WHERE username = ? AND password = ? AND role = ?`
     ;
   
-    db.query(query, [username, password], (err, results) => {
+    db.query(query, [username, password, role], (err, results) => {
       if (err) {
         console.log("SQL Error", err);
         return res.status(500).json({ error: err.message });
         }
   
-      if (results.length > 0) {
-        res.status(200).json({ message: "Login successful", user: results[0] });
-      } else {
-        res.status(401).json({ message: "Invalid username or password" });
-      }
-    });
-  });
+        if (results.length > 0) {
+            const user = results[0];
+            req.session.userId = user.user_id;     
+            req.session.userRole = user.role;      
+            console.log(">> Session after login:", req.session);
+
+            
+            res.status(200).json({ 
+              message: "Login successful", 
+              user: { id: user.user_id, username: user.username, role: user.role } 
+            });
+          } else {
+            res.status(401).json({ message: "Invalid username or password" });
+          }
+        });
+      });
+
+router.get("/me", (req, res) => {
+  if (req.session.userRole) {
+    res.json({ role: req.session.userRole });
+  } else {
+    res.status(401).json({ role: null });
+  }
+});     
 
 router.post("/signup", (req, res) => {
     const {
@@ -35,18 +52,14 @@ router.post("/signup", (req, res) => {
       role,
       emails,
       phones,
-      // Mentor-specific
       activeStatus,
       skills,
       academicBackground,
-      // Mentee-specific
       academicStatus,
       institution,
-      // Common
       goals
     } = req.body;
   
-    // Step 1: Insert into Users
     const userQuery = `
       INSERT INTO Users (username, password, first_name, last_name, role)
       VALUES (?, ?, ?, ?, ?)
@@ -61,7 +74,6 @@ router.post("/signup", (req, res) => {
   
       const userId = userResult.insertId;
   
-      // Step 2: Insert emails
       const emailQuery = `
         INSERT INTO Emails (user_id, email) VALUES ?
       `;
@@ -73,7 +85,6 @@ router.post("/signup", (req, res) => {
           return res.status(500).json({ error: err.message });
         }
   
-        // Step 3: Insert phones
         const phoneQuery = `INSERT INTO Phones (user_id, phone) VALUES ?`;
         const phoneValues = phones.map((phone) => [userId, phone]);
   
@@ -85,7 +96,6 @@ router.post("/signup", (req, res) => {
   
           const dateJoined = new Date();
   
-          // Step 4: Role-specific insert
           if (role === "Mentor") {
             const mentorQuery = `
               INSERT INTO Mentors 
@@ -141,6 +151,96 @@ router.post("/signup", (req, res) => {
       });
     });
   });
+
+router.get("/profile", (req, res) => {
+    console.log(">> Session in /profile:", req.session);
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+  
+    const uid  = req.session.userId;
+    const role = req.session.userRole;
+  
+    const userSql = `
+      SELECT 
+        first_name AS firstName,
+        last_name  AS lastName
+      FROM Users
+      WHERE user_id = ?;
+    `;
+  
+    const emailsSql = "SELECT email FROM Emails WHERE user_id = ?;";
+    const phonesSql = "SELECT phone FROM Phones WHERE user_id = ?;";
+  
+    const mentorSql = `
+      SELECT 
+        academic_background AS mentorAcademicStatus,
+        active_status       AS mentorActiveStatus,
+        goals                AS goal,
+        skills               AS skill
+      FROM Mentors
+      WHERE mentor_id = ?;
+    `;
+    const menteeSql = `
+      SELECT
+        institution           AS menteeInstitution,
+        academic_status       AS menteeAcademicStatus,
+        goals                AS goal,
+        skills               AS skill
+      FROM Mentees
+      WHERE mentee_id = ?;
+    `;
+  
+    db.query(userSql, [uid], (e, userRows) => {
+      if (e) return res.status(500).json({ message: "DB error" });
+      if (!userRows.length) return res.status(404).json({ message: "User not found" });
+  
+      const profile = {
+        ...userRows[0],
+        role: role.toLowerCase()
+      };
+  
+      db.query(emailsSql, [uid], (e, emailRows) => {
+        if (e) return res.status(500).json({ message: "DB error" });
+        profile.emails = emailRows.map(r => r.email);
+  
+        db.query(phonesSql, [uid], (e, phoneRows) => {
+          if (e) return res.status(500).json({ message: "DB error" });
+          profile.phones = phoneRows.map(r => r.phone);
+  
+          if (role === "Mentor") {
+            db.query(mentorSql, [uid], (e, mRows) => {
+              if (e) return res.status(500).json({ message: "DB error" });
+              if (mRows.length) Object.assign(profile, mRows[0]);
+              res.json(profile);
+            });
+          } else if (role === "Mentee") {
+            db.query(menteeSql, [uid], (e, mRows) => {
+              if (e) return res.status(500).json({ message: "DB error" });
+              if (mRows.length) Object.assign(profile, mRows[0]);
+              res.json(profile);
+            });
+          } else {
+            // Admin: no extra fields
+            res.json(profile);
+          }
+        });
+      });
+    });
+  });
+
+  router.post("/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log("Logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie("connect.sid");
+      return res.status(200).json({ message: "Logged out successfully" });
+    });
+  });
+  
+
 
 export default router;
 
