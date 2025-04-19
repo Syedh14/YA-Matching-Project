@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../images/logo.png';
 import users from '../data/users';
+import axios from 'axios';
 
 function Login() {
   
@@ -58,30 +59,35 @@ function Login() {
   //   setTimeout(() => navigate(`/${loginRole}`), 800);
   // };
 
-  const handleLogin = () => {
-    const staticList = users[loginRole] || [];
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/auth/login", {
+        email: userId,
+        password: password
+      });
   
-    const storedUsers = JSON.parse(localStorage.getItem('customUsers') || '{}');
-    const localList = storedUsers[loginRole] || [];
+      const user = response.data.user;
   
-    const combinedUsers = [...staticList, ...localList];
-    const match = combinedUsers.find(u => u.userId === userId && u.password === password);
+      // Add role manually if needed
+      const userData = {
+        ...user,
+        role: loginRole
+      };
   
-    if (!match) {
-      setLoginMessage('❌ Invalid credentials. Please try again.');
-      return;
+      setLoginMessage("✅ Login successful!");
+      localStorage.setItem("userRole", loginRole);
+      localStorage.setItem("loggedInUser", JSON.stringify(userData));
+  
+      setTimeout(() => navigate(`/${loginRole}`), 800);
+  
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setLoginMessage("❌ Invalid credentials. Please try again.");
+      } else {
+        setLoginMessage("❌ An error occurred during login.");
+        console.error(error);
+      }
     }
-
-      // Build full user data including role-specific fields
-    const userData = {
-      ...match,
-      role: loginRole
-    };
-    
-    setLoginMessage('✅ Login successful!');
-    localStorage.setItem('userRole', loginRole);
-    localStorage.setItem('loggedInUser', JSON.stringify(userData));  
-    setTimeout(() => navigate(`/${loginRole}`), 800);
   };
   
   
