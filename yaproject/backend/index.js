@@ -6,20 +6,21 @@ import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
+const SECRET = process.env.SECRET;
+
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:3000',   // URL of your React app
-    credentials: true                 // allow credentials (cookies) to be sent
+    origin: 'http://localhost:3000',  
+    credentials: true              
   }));
   app.use(session({
-    secret: 'yourSecretKey',          // replace with env variable in production
-    resave: false,                    // don't save session if unmodified
-    saveUninitialized: false,         // don't create session until something stored
+    secret: `${SECRET}`,          
+    resave: false,                    
+    saveUninitialized: false,        
     cookie: {
-      httpOnly: true,                 // cookie not accessible via JS (secure)
-      secure: false,                  // set true if using HTTPS
-      sameSite: 'lax'                 // lax is usually fine for same-site requests
-      // (no `maxAge` set here means cookie expires when browser is closed)
+      httpOnly: true,        
+      secure: false,      
+      sameSite: 'lax' 
     }
   }));
 app.use(express.json());
