@@ -47,13 +47,16 @@ function Login() {
         username: userId,
         password: password
       });
-
+  
       const user = response.data.user;
-      const userData = { ...user, role: loginRole };
+  
+      // ✅ Use role from backend, not selected role
       setLoginMessage("Login successful!");
-      localStorage.setItem("userRole", loginRole);
-      localStorage.setItem("loggedInUser", JSON.stringify(userData));
-      setTimeout(() => navigate(`/${loginRole}`), 800);
+      setTimeout(() => navigate(`/${user.role}`), 800); // e.g. '/Admin', '/Mentor', '/Mentee'
+      
+      // Optional: If you need to pass user info to other components, use state/context instead
+      // setUser(user);
+  
     } catch (error) {
       if (error.response && error.response.status === 401) {
         setLoginMessage("Invalid credentials. Please try again.");
@@ -63,6 +66,7 @@ function Login() {
       }
     }
   };
+  
 
   const openCreateModal = () => {
     setFirstName('');
