@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../images/logo.png';
-import users from '../data/users';
+
 import axios from 'axios';
 
 function Login() {
@@ -47,31 +47,18 @@ function Login() {
   };
   const closeLoginModal = () => setShowLoginModal(false);
 
-  // const handleLogin = () => {
-  //   const list = users[loginRole] || [];
-  //   const match = list.find(u => u.userId === userId && u.password === password);
-  //   if (!match) {
-  //     setLoginMessage('❌ Invalid credentials. Please try again.');
-  //     return;
-  //   }
-  //   setLoginMessage('✅ Login successful!');
-  //   localStorage.setItem('userRole', loginRole);
-  //   setTimeout(() => navigate(`/${loginRole}`), 800);
-  // };
-
   const handleLogin = async () => {
     try {
       const response = await axios.post("http://localhost:5000/auth/login", {
-        email: userId,
+        username: userId,    // ✅ use 'username' instead of 'email'
         password: password
       });
   
       const user = response.data.user;
   
-      // Add role manually if needed
       const userData = {
         ...user,
-        role: loginRole
+        role: loginRole  // only use this if role isn't already included in response
       };
   
       setLoginMessage("✅ Login successful!");
@@ -89,6 +76,8 @@ function Login() {
       }
     }
   };
+  
+  
   
   
   const openCreateModal = () => {
@@ -120,38 +109,9 @@ function Login() {
     }
   }, [newRole]);
 
-  // const handleCreateAccount = () => {
-  //   const baseInvalid =
-  //     !firstName.trim() ||
-  //     !lastName.trim() ||
-  //     !newUserId.trim() ||
-  //     !newPassword.trim() ||
-  //     !newRole ||
-  //     emails.some(e => !e.trim()) ||
-  //     phones.some(p => !p.trim()) ||
-  //     !goal.trim() ||
-  //     !skill.trim();
+  
 
-  //   const mentorInvalid = newRole === 'mentor' && (
-  //     !mentorAcademicStatus.trim() ||
-  //     !mentorActiveStatus
-  //   );
-
-  //   const menteeInvalid = newRole === 'mentee' && (
-  //     !menteeInstitution.trim() ||
-  //     !menteeAcademicStatus.trim()
-  //   );
-
-  //   if (baseInvalid || mentorInvalid || menteeInvalid) {
-  //     setCreateMessage('❌ Please fill out all required fields (including popups).');
-  //     return;
-  //   }
-
-  //   setCreateMessage('✅ Account created!');
-  //   setTimeout(closeCreateModal, 800);
-  // };
-
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
     const baseInvalid =
       !firstName.trim() ||
       !lastName.trim() ||
@@ -159,27 +119,27 @@ function Login() {
       !newPassword.trim() ||
       !newRole ||
       emails.some(e => !e.trim()) ||
-      phones.some(p => !p.trim()) ||
+      phones.some(p => !p.trim())||
       !goal.trim() ||
       !skill.trim();
   
-    const mentorInvalid = newRole === 'mentor' && (
-      !mentorAcademicStatus.trim() ||
+    const mentorInvalid = newRole === "mentor" && (
+      !mentorAcademicStatus.trim() || 
       !mentorActiveStatus
     );
   
-    const menteeInvalid = newRole === 'mentee' && (
+    const menteeInvalid = newRole === "mentee" && (
       !menteeInstitution.trim() ||
       !menteeAcademicStatus.trim()
     );
   
-    if (baseInvalid || mentorInvalid || menteeInvalid) {
-      setCreateMessage('❌ Please fill out all required fields.');
+    if (baseInvalid ||mentorInvalid || menteeInvalid) {
+      setCreateMessage("❌ Please fill out all required fields.");
       return;
     }
   
     const newUser = {
-      userId: newUserId,
+      username: newUserId,
       password: newPassword,
       firstName,
       lastName,
@@ -188,28 +148,32 @@ function Login() {
       goal,
       skill,
       role: newRole,
-      ...(newRole === 'mentor' && {
+      ...(newRole === "mentor" && {
         academicStatus: mentorAcademicStatus,
         activeStatus: mentorActiveStatus
       }),
-      ...(newRole === 'mentee' && {
+      ...(newRole === "mentee" && {
         institution: menteeInstitution,
         academicStatus: menteeAcademicStatus
       })
     };
   
-    // Save to localStorage
-    const storedUsers = JSON.parse(localStorage.getItem('customUsers') || '{}');
-    const roleGroup = storedUsers[newRole] || [];
-    roleGroup.push(newUser);
-    storedUsers[newRole] = roleGroup;
-    localStorage.setItem('customUsers', JSON.stringify(storedUsers));
+    try {
+      const response = await axios.post("http://localhost:5000/auth/signup", newUser);
+
+      if (!response.status !== 201) {
+        throw new Error(response.data.error || "Something went wrong");
+      }
   
-    setCreateMessage('✅ Account created successfully!');
-    setTimeout(() => {
-      closeCreateModal();
-      openLoginModal(newRole);
-    }, 1000);
+      setCreateMessage("✅ Account created successfully!");
+      setTimeout(() => {
+        closeCreateModal();
+        openLoginModal(newRole);
+      }, 1000);
+    } catch (error) {
+      setCreateMessage("❌ Failed to create account.");
+      console.error(error);
+    }
   };
   
 
