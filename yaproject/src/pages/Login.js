@@ -61,7 +61,7 @@ function Login() {
         role: loginRole 
       };
   
-      setLoginMessage("✅ Login successful!");
+      setLoginMessage("Login successful!");
       localStorage.setItem("userRole", loginRole);
       localStorage.setItem("loggedInUser", JSON.stringify(userData));
   
