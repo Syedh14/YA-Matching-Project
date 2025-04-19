@@ -50,7 +50,7 @@ function Login() {
   const handleLogin = async () => {
     try {
       const response = await axios.post("http://localhost:5000/auth/login", {
-        username: userId,    // ✅ use 'username' instead of 'email'
+        username: userId,   
         password: password
       });
   
@@ -58,7 +58,7 @@ function Login() {
   
       const userData = {
         ...user,
-        role: loginRole  // only use this if role isn't already included in response
+        role: loginRole 
       };
   
       setLoginMessage("✅ Login successful!");
@@ -69,9 +69,9 @@ function Login() {
   
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        setLoginMessage("❌ Invalid credentials. Please try again.");
+        setLoginMessage("Invalid credentials. Please try again.");
       } else {
-        setLoginMessage("❌ An error occurred during login.");
+        setLoginMessage("An error occurred during login.");
         console.error(error);
       }
     }
@@ -134,7 +134,7 @@ function Login() {
     );
   
     if (baseInvalid ||mentorInvalid || menteeInvalid) {
-      setCreateMessage("❌ Please fill out all required fields.");
+      setCreateMessage("Please fill out all required fields.");
       return;
     }
   
@@ -165,13 +165,13 @@ function Login() {
         throw new Error(response.data.error || "Something went wrong");
       }
   
-      setCreateMessage("✅ Account created successfully!");
+      setCreateMessage("Account created successfully!");
       setTimeout(() => {
         closeCreateModal();
         openLoginModal(newRole);
       }, 1000);
     } catch (error) {
-      setCreateMessage("❌ Failed to create account.");
+      setCreateMessage("Failed to create account.");
       console.error(error);
     }
   };
