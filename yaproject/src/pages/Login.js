@@ -43,7 +43,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/auth/login", {
+      const response = await axios.post("http://localhost:5001/auth/login", {
         username: userId,
         password: password
       });
@@ -141,7 +141,7 @@ function Login() {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/auth/signup", newUser);
+      const response = await axios.post("http://localhost:5001/auth/signup", newUser);
 
       // correctly detect HTTP 201 Created
       if (response.status === 201) {
