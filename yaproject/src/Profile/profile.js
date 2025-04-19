@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get("http://localhost:5001/auth/profile", { withCredentials: true })
@@ -17,7 +19,21 @@ function Profile() {
       });
   }, []);
 
-  if (!user) return <div>Loading...</div>;
+  if (!user) {
+    return <div>Loading...</div>; 
+  }
+
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("http://localhost:5001/auth/logout", {}, { withCredentials: true });
+      navigate("/"); 
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+  
+  
 
   return (
     <>
@@ -25,9 +41,15 @@ function Profile() {
       <div className="min-h-screen flex items-center justify-center bg-primary">
         <div className="bg-white shadow-md rounded p-10 max-w-lg w-full">
           {/* Header with an Edit button (if needed) */}
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-end gap-2 mb-6">
             <button className="bg-gray-300 text-black font-bold py-1 px-3 rounded">
               Edit
+            </button>
+            <button
+              className="bg-red-500 text-white font-bold py-1 px-3 rounded"
+              onClick={handleLogout}
+            >
+              Logout
             </button>
           </div>
 

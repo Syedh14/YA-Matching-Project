@@ -20,16 +20,11 @@ router.post("/login", (req, res) => {
   
         if (results.length > 0) {
             const user = results[0];
-            // *** Store user info in session ***
-            req.session.userId = user.user_id;          // for reference (optional)
-            req.session.userRole = user.role;      // e.g. "Admin", "Mentor", or "Mentee"
-            //Optionally, you could store the whole user object:
-            //req.session.user = { id: user.id, username: user.username, role: user.role };
-            //But storing just essentials is better (avoid storing password!). */
+            req.session.userId = user.user_id;     
+            req.session.userRole = user.role;      
             console.log(">> Session after login:", req.session);
 
             
-            // Respond with some user info (excluding sensitive data)
             res.status(200).json({ 
               message: "Login successful", 
               user: { id: user.user_id, username: user.username, role: user.role } 
@@ -42,10 +37,8 @@ router.post("/login", (req, res) => {
 
 router.get("/me", (req, res) => {
   if (req.session.userRole) {
-    // User is logged in, return their role (and any other info if needed)
     res.json({ role: req.session.userRole });
   } else {
-    // No session or not logged in
     res.status(401).json({ role: null });
   }
 });     
@@ -59,18 +52,14 @@ router.post("/signup", (req, res) => {
       role,
       emails,
       phones,
-      // Mentor-specific
       activeStatus,
       skills,
       academicBackground,
-      // Mentee-specific
       academicStatus,
       institution,
-      // Common
       goals
     } = req.body;
   
-    // Step 1: Insert into Users
     const userQuery = `
       INSERT INTO Users (username, password, first_name, last_name, role)
       VALUES (?, ?, ?, ?, ?)
@@ -85,7 +74,6 @@ router.post("/signup", (req, res) => {
   
       const userId = userResult.insertId;
   
-      // Step 2: Insert emails
       const emailQuery = `
         INSERT INTO Emails (user_id, email) VALUES ?
       `;
@@ -97,7 +85,6 @@ router.post("/signup", (req, res) => {
           return res.status(500).json({ error: err.message });
         }
   
-        // Step 3: Insert phones
         const phoneQuery = `INSERT INTO Phones (user_id, phone) VALUES ?`;
         const phoneValues = phones.map((phone) => [userId, phone]);
   
@@ -109,7 +96,6 @@ router.post("/signup", (req, res) => {
   
           const dateJoined = new Date();
   
-          // Step 4: Role-specific insert
           if (role === "Mentor") {
             const mentorQuery = `
               INSERT INTO Mentors 
@@ -168,15 +154,13 @@ router.post("/signup", (req, res) => {
 
 router.get("/profile", (req, res) => {
     console.log(">> Session in /profile:", req.session);
-    // 1) guard: must be logged in
     if (!req.session.userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
   
     const uid  = req.session.userId;
-    const role = req.session.userRole; // "Admin" | "Mentor" | "Mentee"
+    const role = req.session.userRole;
   
-    // 2) pull your common fields (make sure names match your SQL schema!)
     const userSql = `
       SELECT 
         first_name AS firstName,
@@ -185,11 +169,9 @@ router.get("/profile", (req, res) => {
       WHERE user_id = ?;
     `;
   
-    // 3) pull emails & phones
     const emailsSql = "SELECT email FROM Emails WHERE user_id = ?;";
     const phonesSql = "SELECT phone FROM Phones WHERE user_id = ?;";
   
-    // 4) role‑specific:
     const mentorSql = `
       SELECT 
         academic_background AS mentorAcademicStatus,
@@ -209,14 +191,13 @@ router.get("/profile", (req, res) => {
       WHERE mentee_id = ?;
     `;
   
-    // Now run them in sequence (or use Promises/async‑await if you prefer)
     db.query(userSql, [uid], (e, userRows) => {
       if (e) return res.status(500).json({ message: "DB error" });
       if (!userRows.length) return res.status(404).json({ message: "User not found" });
   
       const profile = {
         ...userRows[0],
-        role: role.toLowerCase()  // for your React checks
+        role: role.toLowerCase()
       };
   
       db.query(emailsSql, [uid], (e, emailRows) => {
@@ -227,7 +208,6 @@ router.get("/profile", (req, res) => {
           if (e) return res.status(500).json({ message: "DB error" });
           profile.phones = phoneRows.map(r => r.phone);
   
-          // Finally role‑specific
           if (role === "Mentor") {
             db.query(mentorSql, [uid], (e, mRows) => {
               if (e) return res.status(500).json({ message: "DB error" });
@@ -248,6 +228,18 @@ router.get("/profile", (req, res) => {
       });
     });
   });
+
+  router.post("/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log("Logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie("connect.sid");
+      return res.status(200).json({ message: "Logged out successfully" });
+    });
+  });
+  
 
 
 export default router;
