@@ -225,7 +225,6 @@ router.get("/profile", (req, res) => {
               res.json(profile);
             });
           } else {
-            // Admin: no extra fields
             res.json(profile);
           }
         });
@@ -243,6 +242,97 @@ router.get("/profile", (req, res) => {
       return res.status(200).json({ message: "Logged out successfully" });
     });
   });
+
+  router.post("/update-profile", (req, res) => {
+    const userId = req.session.userId;
+    const role = req.session.userRole;
+  
+    if (!userId || !role) {
+      return res.status(401).json({ error: "Unauthorized: no session found" });
+    }
+  
+    const {
+      firstName,
+      lastName,
+      username,
+      password,
+      phones,
+      emails,
+      goal,
+      skill,
+      academicStatus,
+      academicBackground,
+      institution,
+      activeStatus,
+    } = req.body;
+  
+    const userUpdateQuery = `
+      UPDATE Users
+      SET first_name = ?, last_name = ?, username = ?, password = ?
+      WHERE user_id = ?
+    `;
+    const userValues = [firstName, lastName, username, password, userId];
+  
+    db.query(userUpdateQuery, userValues, (err) => {
+      if (err) {
+        console.error("User update error:", err);
+        return res.status(500).json({ error: err.message });
+      }
+  
+      db.query("DELETE FROM Phones WHERE user_id = ?", [userId], (err) => {
+        if (err) return res.status(500).json({ error: "Phone delete failed" });
+  
+        const phoneValues = phones.map((p) => [userId, p]);
+        db.query("INSERT INTO Phones (user_id, phone) VALUES ?", [phoneValues], (err) => {
+          if (err) return res.status(500).json({ error: "Phone insert failed" });
+  
+          db.query("DELETE FROM Emails WHERE user_id = ?", [userId], (err) => {
+            if (err) return res.status(500).json({ error: "Email delete failed" });
+  
+            const emailValues = emails.map((e) => [userId, e]);
+            db.query("INSERT INTO Emails (user_id, email) VALUES ?", [emailValues], (err) => {
+              if (err) return res.status(500).json({ error: "Email insert failed" });
+  
+              if (role === "Mentor") {
+                const normalizedActiveStatus = activeStatus === true || activeStatus === "true" ? 1 : 0;
+              
+                const mentorQuery = `
+                  UPDATE Mentors
+                  SET goals = ?, skills = ?, academic_background = ?, active_status = ?
+                  WHERE mentor_id = ?
+                `;
+                const mentorValues = [goal, skill, academicBackground, normalizedActiveStatus, userId];
+                db.query(mentorQuery, mentorValues, finishUpdate);
+              }
+               else if (role === "Mentee") {
+                const menteeQuery = `
+                  UPDATE Mentees
+                  SET goals = ?, skills = ?, academic_status = ?, institution = ?
+                  WHERE mentee_id = ?
+                `;
+                const menteeValues = [goal, skill, academicStatus, institution, userId];
+                db.query(menteeQuery, menteeValues, finishUpdate);
+              } else if (role === "Admin") {
+                finishUpdate();
+              } else {
+                return res.status(400).json({ error: "Invalid role" });
+              }
+  
+              function finishUpdate(err) {
+                if (err) {
+                  console.error("Role-specific update error:", err);
+                  return res.status(500).json({ error: err.message });
+                }
+  
+                return res.status(200).json({ message: "Profile updated successfully" });
+              }
+            });
+          });
+        });
+      });
+    });
+  });
+  
   
 
 
