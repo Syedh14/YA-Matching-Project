@@ -6,18 +6,22 @@ function AddProgressReportModal({ newReport, setNewReport, onSubmit, onClose, me
       <div className="bg-white p-6 rounded shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4">Add Progress Report</h2>
 
+
         {/* Dropdown for selecting mentee */}
         <select
+          name="menteeId"
           className="w-full mb-2 p-2 border rounded"
-          value={newReport.menteeId || ''}
+          value={newReport.menteeId}
           onChange={(e) =>
             setNewReport({ ...newReport, menteeId: e.target.value })
           }
         >
-          <option value="" disabled>Select Mentee</option>
-          {mentees.map((mentee) => (
-            <option key={mentee.user_id} value={mentee.user_id}>
-              {mentee.name}
+          <option value="" disabled>
+            Select Mentee…
+          </option>
+          {mentees.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
             </option>
           ))}
         </select>
