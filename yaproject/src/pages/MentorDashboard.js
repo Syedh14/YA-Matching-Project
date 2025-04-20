@@ -19,6 +19,7 @@ const MenteeDashboard = () => {
     session_date: "",
     location: ""
   });  
+  const [selectedMentee, setSelectedMentee] = useState(null);
 
 
   useEffect(() => {
@@ -70,6 +71,32 @@ const MenteeDashboard = () => {
   const handleDeleteSession = (sessionId) => {
     setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
   };
+
+  const matchedMentees = [
+    {
+      id: 5,
+      name: "Charlie Brown",
+      phone: "555-123-4567",
+      email: "charlie.brown@example.com",
+      goals: "Learn full-stack dev",
+      dateJoined: "2024-03-15",
+      skills: "React, Node.js",
+      institution: "University of XYZ",
+      status: "Undergraduate"
+    },
+    {
+      id: 6,
+      name: "Dana Lee",
+      phone: "555-987-6543",
+      email: "dana.lee@example.com",
+      goals: "Build a portfolio",
+      dateJoined: "2024-04-01",
+      skills: "HTML, CSS, JavaScript",
+      institution: "Polytechnic Institute",
+      status: "Diploma Student"
+    }
+  ];
+  
   
   
 
@@ -144,9 +171,7 @@ const MenteeDashboard = () => {
           </div>
         </div>
 
-        {/* Right Column: Mentee Button + Potential Sessions */}
         <div className="flex flex-col gap-4 items-end w-80">
-          {/* Mentee Info Button */}
           <button
             onClick={() => setShowMenteeModal(true)}
             className="w-full h-28 border border-gray-400 rounded bg-white shadow hover:bg-gray-100 text-sm text-gray-800 p-3 text-left"
@@ -156,7 +181,6 @@ const MenteeDashboard = () => {
             <span className="text-xs">(click here for details)</span>
           </button>
   
-          {/* Potential Sessions */}
           <div className="w-full bg-white p-4 rounded shadow">
             <h2 className="text-lg font-bold mb-4">Potential Sessions</h2>
             <ul className="space-y-2">
@@ -185,7 +209,6 @@ const MenteeDashboard = () => {
           </div>
         </div>
   
-        {/* Session Info Modal */}
         {showModal && selectedSession && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
@@ -221,51 +244,64 @@ const MenteeDashboard = () => {
           </div>
         )}
   
-        {/* Mentee Info Modal */}
         {showMenteeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg w-[36rem]">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Mentor Information</h2>
-              <button
-                className="text-xl font-bold text-red-500 hover:text-secondary transition"
-                onClick={() => {setShowMenteeModal(false)}}
-              >
-                X
-              </button>
-            </div>
-            <div>
-                <p className="text-lg">
-                  <span className="font-bold">User ID:</span> 3
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Name: </span> Talaal Irtija
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Phone: </span> 4039999213, 4031231233
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Email: </span>irtijat@gmail.com, talaal.irtija@ucalgary.ca
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Goals: </span>Get better at math
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Date Joined: </span>Today
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Skills: </span>PE
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Institution: </span>U of C
-                </p>
-                <p className="text-lg mt-2">
-                  <span className="font-bold">Academic Status: </span>Failed
-                </p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full max-h-[80vh] overflow-auto relative">
+            <button
+              onClick={() => {
+                setShowMenteeModal(false);
+                setSelectedMentee(null);
+              }}
+              className="absolute top-2 right-2 text-xl font-bold text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+
+            <h3 className="text-xl font-bold mb-4">
+              {!selectedMentee ? "Select a Mentee" : "Mentee Details"}
+            </h3>
+
+            {!selectedMentee ? (
+              <div className="space-y-4">
+                {matchedMentees.map((mentee) => (
+                  <div
+                    key={mentee.id}
+                    onClick={() => setSelectedMentee(mentee)}
+                    className="cursor-pointer px-4 py-2 border rounded-lg hover:bg-primary hover:text-black transition"
+                  >
+                    <p className="text-lg font-medium">{mentee.name}</p>
+                    <p className="text-sm text-gray-500">ID: {mentee.id}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-lg"><span className="font-bold">User ID:</span> {selectedMentee.id}</p>
+                <p className="text-lg"><span className="font-bold">Name:</span> {selectedMentee.name}</p>
+                <p className="text-lg"><span className="font-bold">Phone:</span> {selectedMentee.phone}</p>
+                <p className="text-lg"><span className="font-bold">Email:</span> {selectedMentee.email}</p>
+                <p className="text-lg"><span className="font-bold">Goals:</span> {selectedMentee.goals}</p>
+                <p className="text-lg"><span className="font-bold">Date Joined:</span> {selectedMentee.dateJoined}</p>
+                <p className="text-lg"><span className="font-bold">Skills:</span> {selectedMentee.skills}</p>
+                <p className="text-lg"><span className="font-bold">Institution:</span> {selectedMentee.institution}</p>
+                <p className="text-lg"><span className="font-bold">Academic Status:</span> {selectedMentee.status}</p>
+              </div>
+            )}
+
+            <div className="mt-4 text-right space-x-2">
+              {selectedMentee && (
+                <button
+                  onClick={() => setSelectedMentee(null)}
+                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                >
+                  Back
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
+
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
