@@ -21,9 +21,6 @@ function ProgressReportModal({ report, onClose }) {
           <strong>Date:</strong> {report.date || 'N/A'}
         </p>
         <p className="text-sm mb-2">
-          <strong>Topic:</strong> {report.topic || 'N/A'}
-        </p>
-        <p className="text-sm mb-2">
           <strong>Areas of improvement:</strong> {report.areasOfImprovement || 'N/A'}
         </p>
         <p className="text-sm mb-2">

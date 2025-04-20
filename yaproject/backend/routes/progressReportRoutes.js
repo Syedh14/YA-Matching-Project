@@ -1,0 +1,85 @@
+// src/routes/progressReportRoutes.js
+import express from 'express';
+import db from '../db.js';
+
+const router = express.Router();
+
+// GET: all reports for a mentor (most recent first)
+router.get('/mentor/:mentorId', async (req, res) => {
+  const { mentorId } = req.params;
+  try {
+    const [rows] = await db
+      .promise()
+      .query(
+        `SELECT * 
+           FROM Progress_Reports 
+          WHERE mentor_id = ? 
+       ORDER BY date_created DESC`,
+        [mentorId]
+      );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching mentor reports:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET: all reports for a mentee (most recent first)
+router.get('/mentee/:menteeId', async (req, res) => {
+  const { menteeId } = req.params;
+  try {
+    const [rows] = await db
+      .promise()
+      .query(
+        `SELECT * 
+           FROM Progress_Reports 
+          WHERE mentee_id = ? 
+       ORDER BY date_created DESC`,
+        [menteeId]
+      );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching mentee reports:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST: create a new progress report
+router.post('/', async (req, res) => {
+  // assume you stored the logged‐in mentor's ID in the session
+  const mentorId = req.session.user?.user_id;
+  const { menteeId, areasOfImprovement, skillsImproved, challenges } = req.body;
+
+  if (!mentorId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    // insert the new report
+    const [result] = await db
+      .promise()
+      .query(
+        `INSERT INTO Progress_Reports
+          (mentor_id, mentee_id, areas_of_improvement, skills_improved, challenges)
+         VALUES (?,       ?,          ?,                      ?,               ?)`,
+        [mentorId, menteeId, areasOfImprovement, skillsImproved, challenges]
+      );
+
+    // fetch and return the newly created row
+    const [newRows] = await db
+      .promise()
+      .query(
+        `SELECT * 
+           FROM Progress_Reports 
+          WHERE report_id = ?`,
+        [result.insertId]
+      );
+
+    res.status(201).json(newRows[0]);
+  } catch (error) {
+    console.error('Error creating report:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+export default router;
