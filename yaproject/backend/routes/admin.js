@@ -35,7 +35,7 @@ router.get("/mentors", (req, res) => {
     });
   });
 
-router.delete("/mentor/:id", (req, res) => {
+  router.delete("/mentor/:id", (req, res) => {
     const mentorId = req.params.id;
   
     const deleteQuery = `DELETE FROM Users WHERE user_id = ?`;
@@ -64,6 +64,30 @@ router.delete("/mentor/:id", (req, res) => {
       res.json({ message: "Mentee deleted successfully", deletedId: menteeId });
     });
   });
+
+
+  router.get("/manages", (req, res) => {
+    const query = `
+      SELECT 
+        m.mentor_id,
+        m.mentee_id,
+        CONCAT(u1.first_name, ' ', u1.last_name) AS mentor_name,
+        CONCAT(u2.first_name, ' ', u2.last_name) AS mentee_name
+      FROM Manages m
+      JOIN Users u1 ON m.mentor_id = u1.user_id
+      JOIN Users u2 ON m.mentee_id = u2.user_id
+    `;
+  
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error("Error fetching matched pairs:", err);
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results);
+    });
+  });
+  
+  
   
   
 
