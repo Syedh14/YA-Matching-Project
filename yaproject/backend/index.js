@@ -3,9 +3,7 @@ import session from "express-session";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
-import progressReportRoutes from "./routes/progressReportRoutes.js"; // NEW
-import db from "./db.js";
-import menteeRoutes from './routes/menteeRoutes.js';
+import progressReportRoutes from "./routes/progress_report.js";
 
 dotenv.config();
 const SECRET = process.env.SECRET;
@@ -29,11 +27,8 @@ app.use(session({
 }));
 
 app.use(express.json());
-app.use('/api', menteeRoutes);
-
-// Routes
 app.use("/auth", authRoutes);
-app.use("/api/progress_report", progressReportRoutes); // NEW
+app.use("/progress_report", progressReportRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

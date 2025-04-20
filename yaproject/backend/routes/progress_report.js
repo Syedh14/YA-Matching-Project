@@ -1,48 +1,50 @@
-// src/routes/progressReportRoutes.js
 import express from 'express';
 import db from '../db.js';
 
 const router = express.Router();
 
 // GET: all reports for a mentor (most recent first)
-router.get('/mentor/:mentorId', async (req, res) => {
+router.get('/mentor/:mentorId', (req, res) => {
   const { mentorId } = req.params;
-  try {
-    const [rows] = await db
-      .promise()
-      .query(
-        `SELECT * 
-           FROM Progress_Reports 
-          WHERE mentor_id = ? 
-       ORDER BY date_created DESC`,
-        [mentorId]
-      );
-    res.json(rows);
-  } catch (error) {
-    console.error('Error fetching mentor reports:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
+
+  db.query(
+    `SELECT * 
+     FROM Progress_Reports 
+     WHERE mentor_id = ? 
+     ORDER BY date_created DESC`,
+    [mentorId],
+    (err, rows) => {
+      if (err) {
+        console.error('❌ Error fetching mentor reports:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(rows);
+    }
+  );
 });
 
+
 // GET: all reports for a mentee (most recent first)
-router.get('/mentee/:menteeId', async (req, res) => {
+router.get('/mentee/:menteeId', (req, res) => {
   const { menteeId } = req.params;
-  try {
-    const [rows] = await db
-      .promise()
-      .query(
-        `SELECT * 
-           FROM Progress_Reports 
-          WHERE mentee_id = ? 
-       ORDER BY date_created DESC`,
-        [menteeId]
-      );
+
+  const query = `
+    SELECT * 
+    FROM Progress_Reports 
+    WHERE mentee_id = ? 
+    ORDER BY date_created DESC
+  `;
+
+  db.query(query, [menteeId], (err, rows) => {
+    if (err) {
+      console.error('❌ Error fetching mentee reports:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
     res.json(rows);
-  } catch (error) {
-    console.error('Error fetching mentee reports:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
+  });
 });
+
 
 // POST: create a new progress report
 router.post('/', async (req, res) => {
