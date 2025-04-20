@@ -29,8 +29,12 @@ function Login() {
   const [showMenteePopup, setShowMenteePopup] = useState(false);
   const [menteeInstitution, setMenteeInstitution] = useState('');
   const [menteeAcademicStatus, setMenteeAcademicStatus] = useState('');
+  const [availability, setAvailability] = useState([""]);
+
 
   const navigate = useNavigate();
+
+
 
   const openLoginModal = role => {
     setLoginRole(role);
@@ -129,7 +133,8 @@ function Login() {
       emails,
       phones,
       goals: goal,            
-      skills: skill,            
+      skills: skill,
+      availability,            
       ...(newRole === "Mentor" && {
         activeStatus: mentorActiveStatus === "active",
         academicBackground: mentorAcademicStatus 
@@ -159,6 +164,15 @@ function Login() {
     }
   };
 
+  const availabilityHelpers = {
+    update: (i, val) => {
+      const copy = [...availability];
+      copy[i] = val;
+      setAvailability(copy);
+    },
+    add: () => setAvailability([...availability, ""]),
+    remove: i => setAvailability(availability.filter((_, idx) => idx !== i))
+  };
   // helpers for dynamic email/phone lists
   const makeListHelpers = (arr, setArr) => ({
     update: (i, val) => {
@@ -350,6 +364,36 @@ function Login() {
               >
                 + Add phone
               </button>
+            </div>
+            {/* Availability */}
+            <div className="mb-4">
+              <label className="font-semibold">Availability</label>
+              {availability.map((dt, i) => (
+                <div key={i} className="flex items-center mt-2">
+                  <input
+                    type="datetime-local"
+                    className="border rounded p-2 flex-grow"
+                    value={dt}
+                    onChange={e => availabilityHelpers.update(i, e.target.value)}
+                  />
+                  {availability.length > 1 && (
+                    <button
+                      className="ml-2 text-red-500 font-bold"
+                      type="button"
+                      onClick={() => availabilityHelpers.remove(i)}
+                    >
+                      &minus;
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                className="mt-2 text-green-600 font-bold"
+                type="button"
+                onClick={availabilityHelpers.add}
+              >
+                + Add availability
+             </button>
             </div>
 
             {/* Goal & Skill */}
