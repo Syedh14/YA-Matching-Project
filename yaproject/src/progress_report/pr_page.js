@@ -372,7 +372,7 @@ function ProgressReports() {
 
         {/* Render sorted reports */}
         <div className="grid gap-4">
-          {sortedReports.map((report) => (
+          {/* {sortedReports.map((report) => (
             <div
               key={report.id}
               className="border p-4 rounded shadow hover:bg-gray-100 cursor-pointer"
@@ -382,7 +382,23 @@ function ProgressReports() {
               <p><strong>Date:</strong> {report.date}</p>
               <p><strong>Mentee ID:</strong> {report.mentee_id}</p>
             </div>
-          ))}
+          ))} */}
+             {sortedReports.map((report) => (
+              <div
+                key={report.report_id}
+                className="border p-4 rounded shadow hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleCardClick(report)}
+              >
+                <p><strong>ID:</strong> {report.report_id}</p>
+                <p>
+                  <strong>Date:</strong>{' '}
+                  {report.date_created
+                      ? new Date(report.date_created).toLocaleDateString()
+                    : 'N/A'}
+                </p>
+                <p><strong>Mentee ID:</strong> {report.mentee_id}</p>
+              </div>
+              ))}
         </div>
       </div>
 
