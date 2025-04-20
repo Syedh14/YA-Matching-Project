@@ -88,7 +88,7 @@ const MenteeDashboard = () => {
             onClick={() => setShowMenteeModal(true)}
             className="w-full h-28 border border-gray-400 rounded bg-white shadow hover:bg-gray-100 text-sm text-gray-800 p-3 text-left"
           >
-            <strong>Mentee Info...</strong>
+            <strong>Mentee Information</strong>
             <br />
             <span className="text-xs">(click here for details)</span>
           </button>
