@@ -372,17 +372,6 @@ function ProgressReports() {
 
         {/* Render sorted reports */}
         <div className="grid gap-4">
-          {/* {sortedReports.map((report) => (
-            <div
-              key={report.id}
-              className="border p-4 rounded shadow hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleCardClick(report)}
-            >
-              <p><strong>ID:</strong> {report.id}</p>
-              <p><strong>Date:</strong> {report.date}</p>
-              <p><strong>Mentee ID:</strong> {report.mentee_id}</p>
-            </div>
-          ))} */}
              {sortedReports.map((report) => (
               <div
                 key={report.report_id}
