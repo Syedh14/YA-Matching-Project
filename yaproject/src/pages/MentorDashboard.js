@@ -163,7 +163,7 @@ const submitFeedback = async () => {
       });
   
     } catch (error) {
-      console.error("❌ Failed to add or update session:", error);
+      console.error("Failed to add or update session:", error);
     }
   };
   
