@@ -1,7 +1,7 @@
 // File: src/geminiMatcher.js
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const ai = new GoogleGenAI({
+const ai = new GoogleGenerativeAI({
   apiKey: process.env.REACT_APP_GEMINI_API_KEY,
 });
 
@@ -16,10 +16,7 @@ async function generateCompletion(prompt, role = "mentor matcher") {
   if (!ai) {
     throw new Error("Google AI client not initialized");
   }
-  const now = new Date()
-    .toISOString()        // "2025-04-21T14:30:00.000Z"
-    .slice(0, 19)         // "2025-04-21T14:30:00"
-    .replace("T", " ");   // "2025-04-21 14:30:00"
+  
 
 
   const formattedPrompt = `
@@ -35,7 +32,6 @@ ${prompt}
   "mentee_id": <int>,
   "admin_id": 1,    
   "ai_model": "gemini-2.0-flash",
-  "match_date": "${now}",
   "success_rate": <int 0–100>,
   "match_approval_status": "Pending"
 }
@@ -66,6 +62,7 @@ function buildMatchingPrompt(mentee, mentors) {
   p += `\nAvailable Mentors:\n`;
   mentors.forEach((m) => {
     if (!m.active_status) return; // e.g. skip inactive mentors
+    if (m.mentee_assigned_count >= 3) return;
 
     p += `Mentor ${m.mentor_id}:\n`;
     if (m.goals)                   p += `- Goals: ${m.goals}\n`;
