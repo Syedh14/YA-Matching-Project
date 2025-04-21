@@ -35,13 +35,25 @@ router.post("/login", (req, res) => {
         });
       });
 
+// router.get("/me", (req, res) => {
+//   if (req.session.userRole) {
+//     res.json({ role: req.session.userRole });
+//   } else {
+//     res.status(401).json({ role: null });
+//   }
+// });    \
+
 router.get("/me", (req, res) => {
-  if (req.session.userRole) {
-    res.json({ role: req.session.userRole });
+  if (req.session.userId && req.session.userRole) {
+    res.json({
+      id:   req.session.userId,
+      role: req.session.userRole
+    });
   } else {
-    res.status(401).json({ role: null });
+    res.status(401).json({ id: null, role: null });
   }
-});     
+});
+
 
 router.post("/signup", (req, res) => {
     const {
