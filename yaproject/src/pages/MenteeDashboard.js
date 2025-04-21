@@ -240,13 +240,13 @@ const MenteeDashboard = () => {
                   }
                   setShowGiveFeedbackModal(true);
                 }}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="bg-secondary text-white px-4 py-2 rounded hover:bg-primary"
               >
                 Give Feedback
               </button>
               <button
                 onClick={loadMyFeedback}
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                className="bg-secondary text-white px-4 py-2 rounded hover:bg-primary"
               >
                 View Feedback
               </button>
@@ -352,7 +352,7 @@ const MenteeDashboard = () => {
                 </button>
                 <button
                   onClick={submitFeedback}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-secondary text-white px-4 py-2 rounded hover:bg-primary"
                 >
                   Submit
                 </button>

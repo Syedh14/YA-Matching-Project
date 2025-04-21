@@ -207,7 +207,7 @@ const submitFeedback = async () => {
           {/* View Feedback button */}
           <button
             onClick={loadMyFeedback}
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+            className="w-full bg-secondary text-white py-2 rounded hover:bg-primary transition"
           >
             View Feedback
           </button>
@@ -354,7 +354,7 @@ const submitFeedback = async () => {
               {selectedMentee && (
              <button
                onClick={() => setShowFeedbackModal(true)}
-               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+               className="bg-secondary text-white px-4 py-2 rounded hover:bg-primary"
              >
                Add Feedback
              </button>
