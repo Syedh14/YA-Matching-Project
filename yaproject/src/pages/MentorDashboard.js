@@ -7,6 +7,7 @@ const MenteeDashboard = () => {
   const [confirmedSessions, setConfirmedSessions] = useState([]);
   const [potentialSessions, setPotentialSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState(null);
+  const [assignedMentees, setAssignedMentees] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -78,30 +79,17 @@ const MenteeDashboard = () => {
     setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
   };
 
-  const matchedMentees = [
-    {
-      id: 7,
-      name: "Charlie Brown",
-      phone: "555-123-4567",
-      email: "charlie.brown@example.com",
-      goals: "Learn full-stack dev",
-      dateJoined: "2024-03-15",
-      skills: "React, Node.js",
-      institution: "University of XYZ",
-      status: "Undergraduate"
-    },
-    {
-      id: 8,
-      name: "Dana Lee",
-      phone: "555-987-6543",
-      email: "dana.lee@example.com",
-      goals: "Build a portfolio",
-      dateJoined: "2024-04-01",
-      skills: "HTML, CSS, JavaScript",
-      institution: "Polytechnic Institute",
-      status: "Diploma Student"
-    }
-  ];
+  useEffect(() => {
+    const fetchMentees = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/feedback/mentor/mentees', { withCredentials: true });
+        setAssignedMentees(response.data);
+      } catch (error) {
+        console.error('Failed to fetch mentees:', error);
+      }
+    };
+    fetchMentees();
+  }, []);
   
 const loadMyFeedback = async () => {
        try {
@@ -325,16 +313,20 @@ const submitFeedback = async () => {
 
             {!selectedMentee ? (
               <div className="space-y-4">
-                {matchedMentees.map((mentee) => (
-                  <div
-                    key={mentee.id}
-                    onClick={() => setSelectedMentee(mentee)}
-                    className="cursor-pointer px-4 py-2 border rounded-lg hover:bg-primary hover:text-black transition"
-                  >
-                    <p className="text-lg font-medium">{mentee.name}</p>
-                    <p className="text-sm text-gray-500">ID: {mentee.id}</p>
-                  </div>
-                ))}
+                {assignedMentees.length === 0 ? (
+                  <p>No mentees assigned.</p>
+                ) : (
+                  assignedMentees.map((mentee) => (
+                    <div
+                      key={mentee.id}
+                      onClick={() => setSelectedMentee(mentee)}
+                      className="cursor-pointer px-4 py-2 border rounded-lg hover:bg-primary hover:text-black transition"
+                    >
+                      <p className="text-lg font-medium">{mentee.name}</p>
+                      <p className="text-sm text-gray-500">ID: {mentee.id}</p>
+                    </div>
+                  ))
+                )}
               </div>
             ) : (
               <div className="space-y-2">

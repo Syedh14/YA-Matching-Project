@@ -1,10 +1,10 @@
 // routes/feedback.js
 import express from 'express';
-import db from '../db.js';  // your mysql connection
+import db from '../db.js'; // your mysql connection
 
 const router = express.Router();
 
-// POST /feedback  (add feedback to the other party)
+// POST /feedback (add feedback to the other party)
 router.post('/', (req, res) => {
   const meId = req.session.userId;
   const meRole = req.session.userRole; // "Mentor" or "Mentee"
@@ -46,7 +46,7 @@ router.post('/', (req, res) => {
   });
 });
 
-// GET /feedback  (view feedback received by me)
+// GET /feedback (view feedback received by me)
 router.get('/', (req, res) => {
   const meId = req.session.userId;
   const meRole = req.session.userRole;
@@ -80,6 +80,48 @@ router.get('/', (req, res) => {
       return res.status(500).send("Could not load feedback");
     }
     res.json(rows);
+  });
+});
+
+// GET /mentor/mentees (fetch mentees assigned to the current mentor)
+router.get('/mentor/mentees', (req, res) => {
+  const mentorId = req.session.userId;
+  if (!mentorId || req.session.userRole !== 'Mentor') {
+    return res.status(403).send('Unauthorized');
+  }
+  const sql = `
+    SELECT 
+      m.mentee_id,
+      u.first_name,
+      u.last_name,
+      m.skills,
+      m.academic_status,
+      m.goals,
+      m.date_joined,
+      m.institution,
+      (SELECT email FROM Emails WHERE user_id = m.mentee_id LIMIT 1) as email,
+      (SELECT phone FROM Phones WHERE user_id = m.mentee_id LIMIT 1) as phone
+    FROM Mentees m
+    JOIN Users u ON m.mentee_id = u.user_id
+    WHERE m.mentor_id = ?
+  `;
+  db.query(sql, [mentorId], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Server error');
+    }
+    const mentees = results.map(row => ({
+      id: row.mentee_id,
+      name: `${row.first_name} ${row.last_name}`,
+      phone: row.phone,
+      email: row.email,
+      goals: row.goals,
+      dateJoined: row.date_joined,
+      skills: row.skills,
+      institution: row.institution,
+      status: row.academic_status
+    }));
+    res.json(mentees);
   });
 });
 
