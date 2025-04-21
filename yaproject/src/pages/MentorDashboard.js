@@ -14,8 +14,8 @@ const MenteeDashboard = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [sessionToReplace, setSessionToReplace] = useState(null);
   const [newSession, setNewSession] = useState({
-    mentor_id: 2,
-    mentee_id: 5,
+    mentor_id: 0,
+    mentee_id: "",
     duration: "",
     topics_covered: "",
     session_type: "Online",
@@ -119,8 +119,55 @@ const submitFeedback = async () => {
          }
        };
 
-  
+  const formatForInput = (dateStr) => {
+    const d = new Date(dateStr);
+    const pad = (n) => n.toString().padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
 
+  const handleAddSession = async () => {
+    try {
+      const response = await axios.post("http://localhost:5001/sessions/addSession", newSession, {
+        withCredentials: true
+      });
+  
+      const addedSession = {
+        ...newSession,
+        session_id: response.data.session_id,
+        session_status: "Actual"
+      };
+  
+      // Add to confirmed sessions
+      setConfirmedSessions(prev =>
+        [...prev, addedSession].sort((a, b) => new Date(a.session_date) - new Date(b.session_date))
+      );
+  
+      // If updating a potential session, remove it
+      if (sessionToReplace !== null) {
+        setPotentialSessions(prev =>
+          prev.filter((s) => s.session_id !== sessionToReplace)
+        );
+        setSessionToReplace(null);
+      }
+  
+      // Reset and close modal
+      setShowAddModal(false);
+      setNewSession({
+        mentor_id: user.user_id,
+        mentee_id: "", 
+        duration: "",
+        topics_covered: "",
+        session_type: "Online",
+        session_date: "",
+        location: ""
+      });
+  
+    } catch (error) {
+      console.error("❌ Failed to add or update session:", error);
+    }
+  };
+  
+  
   return (
     <div>
       <Header />
@@ -175,8 +222,8 @@ const submitFeedback = async () => {
             className="bg-secondary text-white px-4 py-2 rounded hover:bg-primary transition"
             onClick={() => {
               setNewSession({
-                mentor_id: 2,      // hardcoded for now
-                mentee_id: 5,
+                mentor_id: user.user_id,
+                mentee_id: "", 
                 duration: "",
                 topics_covered: "",
                 session_type: "Online",
@@ -237,13 +284,13 @@ const submitFeedback = async () => {
                 key={s.session_id}
                 onClick={() => {
                   setNewSession({
-                    mentor_id: 2, 
-                    mentee_id: 5, 
+                    mentor_id: s.mentor_id, 
+                    mentee_id: s.mentee_id, 
                     duration: s.duration,
-                    topics_covered: "", 
-                    session_type: "Online",
-                    session_date: s.session_date,
-                    location: ""
+                    topics_covered: s.topics_covered, 
+                    session_type: s.session_type,
+                    session_date: formatForInput(s.session_date),
+                    location: s.location
                   });
                   setShowAddModal(true);
                   setSessionToReplace(s.session_id);
@@ -374,12 +421,20 @@ const submitFeedback = async () => {
                 className="border p-2 rounded bg-gray-100 text-gray-500"
                 value={newSession.mentor_id}
               />
-              <input
-                type="number"
-                disabled
-                className="border p-2 rounded bg-gray-100 text-gray-500"
+              <select
+                className="border p-2 rounded"
                 value={newSession.mentee_id}
-              />
+                onChange={(e) =>
+                  setNewSession({ ...newSession, mentee_id: parseInt(e.target.value) })
+                }
+              >
+                <option value="">Select Mentee</option>
+                {assignedMentees.map((mentee) => (
+                  <option key={mentee.id} value={mentee.id}>
+                    {mentee.name} (ID: {mentee.id})
+                  </option>
+                ))}
+              </select>
               <input
                 type="number"
                 placeholder="Duration (minutes)"
@@ -425,36 +480,7 @@ const submitFeedback = async () => {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  const newEntry = {
-                    ...newSession,
-                    session_id: Date.now(),
-                    session_status: "Actual"
-                  };
-                
-                  setConfirmedSessions((prev) =>
-                    [...prev, newEntry].sort((a, b) => new Date(a.session_date) - new Date(b.session_date))
-                  );
-                
-                  if (sessionToReplace !== null) {
-                    setPotentialSessions((prev) =>
-                      prev.filter((s) => s.session_id !== sessionToReplace)
-                    );
-                    setSessionToReplace(null);
-                  }
-                
-                  setShowAddModal(false);
-                  setNewSession({
-                    mentor_id: 2,
-                    mentee_id: 5,
-                    duration: "",
-                    topics_covered: "",
-                    session_type: "Online",
-                    session_date: "",
-                    location: ""
-                  });
-                }}
-                
+                onClick={handleAddSession}
                 className="bg-secondary text-white px-4 py-2 rounded hover:primary"
               >
                 Add Session

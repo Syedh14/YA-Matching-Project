@@ -3,12 +3,11 @@ import db from "../db.js";
 
 const router = express.Router();
 
-// GET all sessions for a specific mentor, separated by status
 router.get('/mentorSessions/:mentorId', (req, res) => {
   const { mentorId } = req.params;
 
   const query = `
-    SELECT 
+      SELECT 
       s.session_id,
       s.session_date,
       s.session_type,
@@ -16,6 +15,8 @@ router.get('/mentorSessions/:mentorId', (req, res) => {
       s.duration,
       s.location,
       s.session_status,
+      s.mentor_id,
+      s.mentee_id,
       CONCAT(m_user.first_name, ' ', m_user.last_name) AS mentor_name,
       CONCAT(me_user.first_name, ' ', me_user.last_name) AS mentee_name
     FROM Sessions s
@@ -64,6 +65,77 @@ router.delete('/deleteSessions/:sessionId', (req, res) => {
     res.status(200).json({ message: "Session deleted successfully" });
   });
 });
+
+router.post("/addSession", (req, res) => {
+  const {
+    session_id,           
+    mentor_id,
+    mentee_id,
+    duration,
+    topics_covered,
+    session_type,
+    session_date,
+    location
+  } = req.body;
+
+  if (session_id) {
+    const updateQuery = `
+      UPDATE Sessions
+      SET 
+        duration = ?,
+        topics_covered = ?,
+        session_type = ?,
+        session_date = ?,
+        location = ?,
+        session_status = 'Actual'
+      WHERE session_id = ?
+    `;
+
+    const values = [
+      duration,
+      topics_covered,
+      session_type,
+      session_date,
+      location,
+      session_id
+    ];
+
+    db.query(updateQuery, values, (err, result) => {
+      if (err) {
+        console.error("❌ Error updating session:", err);
+        return res.status(500).json({ error: "Error updating session" });
+      }
+
+      return res.status(200).json({ message: "Session updated to Actual", session_id });
+    });
+  } else {
+    const insertQuery = `
+      INSERT INTO Sessions 
+      (mentor_id, mentee_id, duration, topics_covered, session_type, session_date, location, session_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'Actual')
+    `;
+
+    const values = [
+      mentor_id,
+      mentee_id,
+      duration,
+      topics_covered,
+      session_type,
+      session_date,
+      location
+    ];
+
+    db.query(insertQuery, values, (err, result) => {
+      if (err) {
+        console.error("❌ Error inserting new session:", err);
+        return res.status(500).json({ error: "Error inserting new session" });
+      }
+
+      return res.status(201).json({ message: "Session added", session_id: result.insertId });
+    });
+  }
+});
+
 
 
 export default router;
