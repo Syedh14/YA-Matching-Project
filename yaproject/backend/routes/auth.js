@@ -69,7 +69,8 @@ router.post("/signup", (req, res) => {
       academicBackground,
       academicStatus,
       institution,
-      goals
+      goals,
+      availability = []
     } = req.body;
   
     const userQuery = `
@@ -122,7 +123,27 @@ router.post("/signup", (req, res) => {
               skills,
               academicBackground
             ];
-            db.query(mentorQuery, mentorValues, finishSignup);
+            //db.query(mentorQuery, mentorValues, finishSignup);
+            db.query(mentorQuery, mentorValues, (err) => {
+                            if (err) return finishSignup(err);
+              
+                            // now insert availability slots for this mentor
+                            if (availability.length) {
+                              const availSql = `
+                                INSERT INTO Mentor_Availability (mentor_id, available_date)
+                                VALUES ?
+                              `;
+                              const availVals = availability.map(dt => [userId, dt]);
+                              db.query(availSql, [availVals], (err) => {
+                                if (err) return finishSignup(err);
+                                finishSignup();    
+                              });
+                            } else {
+                              finishSignup();
+                            }
+                          });
+              
+
           } else if (role === "Mentee") {
             const menteeQuery = `
               INSERT INTO Mentees 
@@ -137,7 +158,26 @@ router.post("/signup", (req, res) => {
               dateJoined,
               institution
             ];
-            db.query(menteeQuery, menteeValues, finishSignup);
+            //db.query(menteeQuery, menteeValues, finishSignup);
+            db.query(menteeQuery, menteeValues, (err) => {
+                            if (err) return finishSignup(err);
+              
+                            // now insert availability slots for this mentee
+                            if (availability.length) {
+                              const availSql = `
+                                INSERT INTO Mentee_Availability (mentee_id, available_date)
+                                VALUES ?
+                              `;
+                              const availVals = availability.map(dt => [userId, dt]);
+                              db.query(availSql, [availVals], (err) => {
+                                if (err) return finishSignup(err);
+                                finishSignup();
+                              });
+                            } else {
+                              finishSignup();
+                            }
+                          });
+              
           } else if (role === "Admin") {
             const adminQuery = `
               INSERT INTO Admins (admin_id, permission)
