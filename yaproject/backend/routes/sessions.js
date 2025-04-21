@@ -46,10 +46,24 @@ router.get('/mentorSessions/:mentorId', (req, res) => {
   });
 });
 
+router.delete('/deleteSessions/:sessionId', (req, res) => {
+  const { sessionId } = req.params;
 
+  const deleteQuery = `DELETE FROM Sessions WHERE session_id = ?`;
 
+  db.query(deleteQuery, [sessionId], (err, result) => {
+    if (err) {
+      console.error("❌ Error deleting session:", err);
+      return res.status(500).json({ error: "Database error while deleting session" });
+    }
 
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Session not found" });
+    }
 
+    res.status(200).json({ message: "Session deleted successfully" });
+  });
+});
 
 
 export default router;

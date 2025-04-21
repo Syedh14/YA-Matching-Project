@@ -64,9 +64,18 @@ const MenteeDashboard = () => {
   }, [user]);
   
 
-  const handleDeleteSession = (sessionId) => {
-    setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
+  const handleDeleteSession = async (sessionId) => {
+    try {
+      await axios.delete(`http://localhost:5001/sessions/deleteSessions/${sessionId}`, {
+        withCredentials: true,
+      });
+  
+      setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
+    } catch (error) {
+      console.error("Failed to delete session:", error);
+    }
   };
+  
 
   useEffect(() => {
     const fetchMentees = async () => {
@@ -252,6 +261,7 @@ const submitFeedback = async () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
               <h3 className="text-xl font-bold mb-4">Session Details</h3>
+              <p><strong>Participants:</strong> {selectedSession.mentor_name}, {selectedSession.mentee_name}</p>
               <p><strong>Date:</strong> {new Date(selectedSession.session_date).toLocaleString()}</p>
               <p><strong>Type:</strong> {selectedSession.session_type}</p>
               <p><strong>Topics:</strong> {selectedSession.topics_covered}</p>
