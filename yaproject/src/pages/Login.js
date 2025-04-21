@@ -241,7 +241,7 @@ function Login() {
             {loginMessage && <p className="text-sm mb-2">{loginMessage}</p>}
             <div className="flex justify-between">
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="bg-secondary hover:bg-primary text-white px-4 py-2 rounded"
                 onClick={handleLogin}
               >
                 Submit
