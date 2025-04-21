@@ -7,7 +7,6 @@ function FilterBar({ filter, setFilter }) {
     { label: 'All', value: 'all' },
     { label: 'My Resources', value: 'my' },
     { label: 'Global Resources', value: 'global' },
-    { label: 'Math', value: 'math' },
     { label: 'Mentor Resources', value: 'mentor' },
     { label: 'Mentee Resources', value: 'mentee' },
     { label: 'Videos', value: 'videos' },

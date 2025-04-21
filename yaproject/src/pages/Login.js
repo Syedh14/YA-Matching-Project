@@ -146,7 +146,7 @@ function Login() {
     };
 
     try {
-      const response = await axios.post("http://localhost:5001/auth/signup", newUser);
+      const response = await axios.post("http://localhost:5001/auth/signup", newUser, {withCredentials: true});
 
       // correctly detect HTTP 201 Created
       if (response.status === 201) {

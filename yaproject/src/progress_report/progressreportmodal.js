@@ -2,7 +2,7 @@
 import React from 'react';
 
 function ProgressReportModal({ report, onClose }) {
-  if (!report) return null; // No report, no modal content
+  if (!report) return null;
 
   return (
     <div 
@@ -11,30 +11,33 @@ function ProgressReportModal({ report, onClose }) {
         bg-black bg-opacity-50
       "
     >
-      <div className="bg-primary p-6 rounded shadow-lg w-96">
+      <div className="bg-white p-6 rounded shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4">Progress Report Details</h2>
 
         <p className="text-sm mb-2">
-          <strong>Progress report id:</strong> {report.id}
+          <strong>Progress report id:</strong> {report.report_id}
         </p>
         <p className="text-sm mb-2">
-          <strong>Date:</strong> {report.date || 'N/A'}
+          <strong>Date:</strong>{' '}
+          {report.date_created
+            ? new Date(report.date_created).toLocaleString()
+            : 'N/A'}
         </p>
         <p className="text-sm mb-2">
-          <strong>Topic:</strong> {report.topic || 'N/A'}
+          <strong>Areas of improvement:</strong>{' '}
+          {report.areas_of_improvement || 'N/A'}
         </p>
         <p className="text-sm mb-2">
-          <strong>Areas of improvement:</strong> {report.areasOfImprovement || 'N/A'}
+          <strong>Skills improved:</strong>{' '}
+          {report.skills_improved || 'N/A'}
         </p>
         <p className="text-sm mb-2">
-          <strong>Skills improved:</strong> {report.skillsImproved || 'N/A'}
-        </p>
-        <p className="text-sm mb-2">
-          <strong>Challenges Faced:</strong> {report.challenges || 'N/A'}
+          <strong>Challenges Faced:</strong>{' '}
+          {report.challenges || 'N/A'}
         </p>
 
         <button
-          className="mt-4 bg-secondary text-white px-4 py-2 rounded hover:bg-secondary"
+          className="mt-4 bg-secondary text-white px-4 py-2 rounded hover:bg-secondary-dark"
           onClick={onClose}
         >
           Close
