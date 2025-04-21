@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import axios from 'axios';
 
 const MenteeDashboard = () => {
+  const [user, setUser] = useState(null);
   const [showMenteeModal, setShowMenteeModal] = useState(false);
   const [confirmedSessions, setConfirmedSessions] = useState([]);
   const [potentialSessions, setPotentialSessions] = useState([]);
@@ -18,14 +19,47 @@ const MenteeDashboard = () => {
   const [feedbackScore, setFeedbackScore] = useState('');
   const [feedbackComment, setFeedbackComment] = useState('');
   const [newSession, setNewSession] = useState({
-    mentor_id: 2,
-    mentee_id: 5,
+    mentor_id: 0,
+    mentee_id: 0,
     duration: "",
     topics_covered: "",
     session_type: "Online",
     session_date: "",
     location: ""
   });
+
+  useEffect(() => {
+    axios.get("http://localhost:5001/auth/profile", { withCredentials: true })
+      .then(res => {
+        setUser(res.data);  
+      })
+      .catch(err => {
+        console.error("Failed to fetch profile data", err);
+        setUser(null);
+      });
+  }, []);
+
+  useEffect(() => {
+
+    const fetchSessions = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/sessions/menteeSessions/${user.user_id}`, {
+          withCredentials: true
+        });
+  
+        setConfirmedSessions(res.data.confirmed);
+        setPotentialSessions(res.data.potential);
+      } catch (err) {
+        console.error("Failed to fetch mentee sessions:", err);
+      }
+    };
+
+    if (user) {
+      if (user?.role === "mentee") {
+        fetchSessions();
+      }
+    }   
+  }, [user]);
 
   useEffect(() => {
     // Fetch assigned mentor
@@ -42,55 +76,18 @@ const MenteeDashboard = () => {
       }
     };
     fetchMentor();
-
-    // Existing session data (unchanged)
-    setConfirmedSessions([
-      {
-        session_id: 1,
-        session_date: "2025-04-21T14:00:00",
-        session_type: "In-Person",
-        topics_covered: "React Basics",
-        duration: 60,
-        location: "Room 305, Tech Building",
-        session_status: "Actual",
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee"
-      },
-      {
-        session_id: 2,
-        session_date: "2025-04-23T10:30:00",
-        session_type: "Online",
-        topics_covered: "Intro to SQL",
-        duration: 45,
-        location: "https://zoom.us/j/123456789",
-        session_status: "Actual",
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee"
-      }
-    ]);
-
-    setPotentialSessions([
-      {
-        session_id: 3,
-        session_date: "2025-04-25T15:00:00",
-        duration: 60,
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee",
-        session_status: "Potential"
-      },
-      {
-        session_id: 4,
-        session_date: "2025-04-27T11:00:00",
-        duration: 45,
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee",
-        session_status: "Potential"
-      }
-    ]);
   }, []);
 
-  const handleDeleteSession = (sessionId) => {
-    setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
+  const handleDeleteSession = async (sessionId) => {
+    try {
+      await axios.delete(`http://localhost:5001/sessions/deleteSessions/${sessionId}`, {
+        withCredentials: true,
+      });
+  
+      setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
+    } catch (error) {
+      console.error("Failed to delete session:", error);
+    }
   };
 
   const submitFeedback = async () => {
@@ -123,6 +120,54 @@ const MenteeDashboard = () => {
       console.error('Failed to fetch feedback:', error);
       alert('Could not load feedback.');
     }
+  };
+
+  const handleAddSession = async () => {
+    try {
+      const response = await axios.post("http://localhost:5001/sessions/addSession", newSession, {
+        withCredentials: true
+      });
+  
+      const addedSession = {
+        ...newSession,
+        session_id: response.data.session_id,
+        session_status: "Actual"
+      };
+  
+      // Add to confirmed sessions
+      setConfirmedSessions(prev =>
+        [...prev, addedSession].sort((a, b) => new Date(a.session_date) - new Date(b.session_date))
+      );
+  
+      // If updating a potential session, remove it
+      if (sessionToReplace !== null) {
+        setPotentialSessions(prev =>
+          prev.filter((s) => s.session_id !== sessionToReplace)
+        );
+        setSessionToReplace(null);
+      }
+  
+      // Reset and close modal
+      setShowAddModal(false);
+      setNewSession({
+        mentor_id: assignedMentor.id,
+        mentee_id: user.user_id, 
+        duration: "",
+        topics_covered: "",
+        session_type: "Online",
+        session_date: "",
+        location: ""
+      });
+  
+    } catch (error) {
+      console.error("Failed to add or update session:", error);
+    }
+  };
+
+  const formatForInput = (dateStr) => {
+    const d = new Date(dateStr);
+    const pad = (n) => n.toString().padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
   return (
@@ -175,8 +220,8 @@ const MenteeDashboard = () => {
               className="bg-secondary text-white px-4 py-2 rounded hover:bg-primary transition"
               onClick={() => {
                 setNewSession({
-                  mentor_id: 2,
-                  mentee_id: 5,
+                  mentor_id: assignedMentor.id,
+                  mentee_id: user.user_id,
                   duration: "",
                   topics_covered: "",
                   session_type: "Online",
@@ -210,13 +255,13 @@ const MenteeDashboard = () => {
                   key={s.session_id}
                   onClick={() => {
                     setNewSession({
-                      mentor_id: 2,
-                      mentee_id: 5,
+                      mentor_id: s.mentor_id,
+                      mentee_id: s.mentee_id,
                       duration: s.duration,
-                      topics_covered: "",
-                      session_type: "Online",
-                      session_date: s.session_date,
-                      location: ""
+                      topics_covered: s.topics_covered,
+                      session_type: s.session_type,
+                      session_date: formatForInput(s.session_date),
+                      location: s.location
                     });
                     setShowAddModal(true);
                     setSessionToReplace(s.session_id);
@@ -451,32 +496,7 @@ const MenteeDashboard = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    const newEntry = {
-                      ...newSession,
-                      session_id: Date.now(),
-                      session_status: "Actual"
-                    };
-                    setConfirmedSessions((prev) =>
-                      [...prev, newEntry].sort((a, b) => new Date(a.session_date) - new Date(b.session_date))
-                    );
-                    if (sessionToReplace !== null) {
-                      setPotentialSessions((prev) =>
-                        prev.filter((s) => s.session_id !== sessionToReplace)
-                      );
-                      setSessionToReplace(null);
-                    }
-                    setShowAddModal(false);
-                    setNewSession({
-                      mentor_id: 2,
-                      mentee_id: 5,
-                      duration: "",
-                      topics_covered: "",
-                      session_type: "Online",
-                      session_date: "",
-                      location: ""
-                    });
-                  }}
+                  onClick={handleAddSession}
                   className="bg-secondary text-white px-4 py-2 rounded hover:primary"
                 >
                   Add Session
