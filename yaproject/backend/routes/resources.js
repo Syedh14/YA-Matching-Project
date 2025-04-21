@@ -105,15 +105,17 @@ router.get('/', (req, res) => {
   }
   const sql = `
     SELECT 
-      resource_id, 
-      user_id, 
-      title, 
-      description, 
-      resource_type, 
-      url, 
-      upload_date 
-    FROM Resources
-    ORDER BY upload_date DESC
+        r.resource_id,
+        r.user_id,
+        r.title,
+        r.description,
+        r.resource_type,
+        r.url,
+        r.upload_date,
+        u.role AS creator_role
+    FROM Resources r
+    JOIN Users u ON r.user_id = u.user_id
+    ORDER BY r.upload_date DESC
   `;
   db.query(sql, (err, rows) => {
     if (err) {
