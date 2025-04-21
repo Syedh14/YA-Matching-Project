@@ -125,4 +125,48 @@ router.get('/mentor/mentees', (req, res) => {
   });
 });
 
+router.get('/mentee/mentor', (req, res) => {
+  const menteeId = req.session.userId;
+  if (!menteeId || req.session.userRole !== 'Mentee') {
+    return res.status(403).send('Unauthorized');
+  }
+  const sql = `
+    SELECT 
+      m.mentor_id,
+      u.first_name,
+      u.last_name,
+      m.goals,
+      m.date_joined,
+      m.skills,
+      m.academic_background,
+      (SELECT email FROM Emails WHERE user_id = m.mentor_id LIMIT 1) as email,
+      (SELECT phone FROM Phones WHERE user_id = m.mentor_id LIMIT 1) as phone
+    FROM Mentees me
+    JOIN Mentors m ON me.mentor_id = m.mentor_id
+    JOIN Users u ON m.mentor_id = u.user_id
+    WHERE me.mentee_id = ?
+  `;
+  db.query(sql, [menteeId], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Server error');
+    }
+    if (results.length === 0) {
+      return res.status(404).send('No mentor assigned');
+    }
+    const mentor = results[0];
+    const mentorData = {
+      id: mentor.mentor_id,
+      name: `${mentor.first_name} ${mentor.last_name}`,
+      phone: mentor.phone,
+      email: mentor.email,
+      goals: mentor.goals,
+      dateJoined: mentor.date_joined,
+      skills: mentor.skills,
+      academicBackground: mentor.academic_background
+    };
+    res.json(mentorData);
+  });
+});
+
 export default router;

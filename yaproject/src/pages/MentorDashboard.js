@@ -127,8 +127,8 @@ const submitFeedback = async () => {
     <div>
       <Header />
       <div className="flex p-6 gap-6 items-start">
-        {/* Confirmed Sessions (slightly smaller) */}
-        <div className="flex-[2] bg-white p-4 rounded shadow">
+        
+        <div className="flex-[3] bg-white p-4 rounded shadow">
           <h2 className="text-lg font-bold mb-4">My Confirmed Sessions</h2>
 
           <div className="space-y-4">
@@ -231,7 +231,7 @@ const submitFeedback = async () => {
         </div>
         
 
-          <div className="w-full bg-white p-4 rounded shadow">
+          <div className="w-flex[1] bg-white p-4 rounded shadow">
             <h2 className="text-lg font-bold mb-4">Potential Sessions</h2>
             <ul className="space-y-2">
               {potentialSessions.map((s, i) => (
