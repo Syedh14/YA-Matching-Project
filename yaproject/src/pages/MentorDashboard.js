@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
+import axios from 'axios';
   
 const MenteeDashboard = () => {
+  const [user, setUser] = useState(null);
   const [showMenteeModal, setShowMenteeModal] = useState(false);
   const [confirmedSessions, setConfirmedSessions] = useState([]);
   const [potentialSessions, setPotentialSessions] = useState([]);
@@ -21,52 +23,40 @@ const MenteeDashboard = () => {
   });  
   const [selectedMentee, setSelectedMentee] = useState(null);
 
+  useEffect(() => {
+    axios.get("http://localhost:5001/auth/profile", { withCredentials: true })
+      .then(res => {
+        setUser(res.data);  
+      })
+      .catch(err => {
+        console.error("Failed to fetch profile data", err);
+        setUser(null);
+      });
+  }, []);
+
 
   useEffect(() => {
-    setConfirmedSessions([
-      {
-        session_id: 1,
-        session_date: "2025-04-21T14:00:00",
-        session_type: "In-Person",
-        topics_covered: "React Basics",
-        duration: 60,
-        location: "Room 305, Tech Building",
-        session_status: "Actual",
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee"
-      },
-      {
-        session_id: 2,
-        session_date: "2025-04-23T10:30:00",
-        session_type: "Online",
-        topics_covered: "Intro to SQL",
-        duration: 45,
-        location: "https://zoom.us/j/123456789",
-        session_status: "Actual", 
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee"
+
+    const fetchSessions = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/sessions/mentorSessions/${user.user_id}`, {
+          withCredentials: true
+        });
+  
+        setConfirmedSessions(res.data.confirmed);
+        setPotentialSessions(res.data.potential);
+      } catch (err) {
+        console.error("Failed to fetch mentor sessions:", err);
       }
-    ]);
-    
-    setPotentialSessions([
-      {
-        session_id: 3,
-        session_date: "2025-04-25T15:00:00",
-        duration: 60,
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee",
-        session_status: "Potential"
-      },
-      {
-        session_id: 4,
-        session_date: "2025-04-27T11:00:00",
-        duration: 45,
-        mentor_name: "Alice Mentor",
-        mentee_name: "Bob Mentee",
-        session_status: "Potential"
+    };
+
+    if (user) {
+      if (user?.role === "mentor") {
+        fetchSessions();
       }
-    ]);    
-  }, []);
+    }   
+  }, [user]);
+  
 
   const handleDeleteSession = (sessionId) => {
     setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));

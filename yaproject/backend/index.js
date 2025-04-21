@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import progressReportRoutes from "./routes/progress_report.js";
 import resourcesRoutes from "./routes/resources.js";
 import adminRoutes from "./routes/admin.js";
+import sessionRoutes from "./routes/sessions.js"
 
 dotenv.config();
 const SECRET = process.env.SECRET;
@@ -32,6 +33,7 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/progress_report", progressReportRoutes);
 app.use("/resources", resourcesRoutes);
+app.use("/sessions", sessionRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
