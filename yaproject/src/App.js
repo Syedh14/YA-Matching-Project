@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -12,6 +10,7 @@ import MentorDashboard from './pages/MentorDashboard';
 import MenteeDashboard from './pages/MenteeDashboard';
 import Resources from './resources/Resources';
 import AdminMatches from './pages/AdminMatches';
+import Profile from './Profile/profile';
 
 
 
@@ -30,6 +29,7 @@ function App() {
         <Route path="/mentee" element={<MenteeDashboard />} />
         
         <Route path="/progress_report" element={<ProgressReports />} />
+        <Route path="/Profile" element={<Profile />} />
 
         <Route path="/resources" element={<Resources />} />
       </Routes>
@@ -38,3 +38,4 @@ function App() {
 }
 
 export default App;
+

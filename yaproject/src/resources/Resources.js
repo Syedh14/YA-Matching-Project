@@ -1,297 +1,362 @@
-// src/resources/Resources.jsx
-import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import FilterBar from '../components/FilterBar'
-import ResourceModal from './ResourceModal';
 
+// src/resources/Resources.jsx
+import React, { useState, useEffect, useMemo } from 'react';
+import Header from '../components/Header';
+import FilterBar from '../components/FilterBar';
+import ResourceModal from './ResourceModal';
+import axios from 'axios';
 
 function Resources() {
-  // Example data structure for resources
-  // Eventually this from SQL backend
-  const [resources, setResources] = useState([
-    {
-      id: 1,
-      title: 'Algebra Basics',
-      type: 'math',          // e.g., "math", "science", etc.
-      visibility: 'my',      // e.g., "my", "global"
-      createdBy: 'mentor',   // e.g., "mentor", "mentee"
-      format: 'video',       // e.g., "video", "pdf"
-      date: '2025-04-01',
-      url: 'https://www.youtube.com/watch?v=NybHckSEQBI'
-    },
-    {
-      id: 2,
-      title: 'Group Project Guide',
-      type: 'science',
-      visibility: 'global',
-      createdBy: 'mentee',
-      format: 'pdf',
-      date: '2025-04-02',
-      description: 'A comprehensive guide for collaborative student projects.'
-    },
-    {
-      id: 3,
-      title: 'Mentor Tips Document',
-      type: 'general',
-      visibility: 'global',
-      createdBy: 'mentor',
-      format: 'pdf',
-      date: '2025-04-03',
-      description: 'An informal guide as to how to be a better mentor.'
-    },
-    {
-      id: 4,
-      title: 'My Private Notes',
-      type: 'math',
-      visibility: 'my',
-      createdBy: 'mentee',
-      format: 'video',
-      date: '2025-04-04',
-      url: 'https://www.youtube.com/watch?v=BJw5tKPP1PY'
-    },
-    // ... add more as needed
-  ]);
+  const [userId, setUserId]           = useState(null);
+  const [role, setRole]               = useState('');
+  const [resources, setResources]     = useState([]);
+  const [filter, setFilter]           = useState('all');
+  const [mentorIds, setMentorIds]     = useState(new Set());
+  const [menteeIds, setMenteeIds]     = useState(new Set());
 
   const [selectedResource, setSelectedResource] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal]               = useState(false);
 
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [pendingVideoUrl, setPendingVideoUrl]     = useState(null);
 
-  const [role, setRole] = useState('');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newResource, setNewResource] = useState({
+    title: '',
+    type: '',
+    url: '',
+    description: '',
+  });
+
+  // 1️⃣ Fetch current session (userId + role)
   useEffect(() => {
-    const storedRole = localStorage.getItem('userRole');
-    setRole(storedRole || '');
+    axios
+      .get('http://localhost:5001/auth/me', { withCredentials: true })
+      .then(res => {
+        setUserId(res.data.id);
+        setRole(res.data.role.toLowerCase());
+      })
+      .catch(console.error);
+  }, []);
+
+  // 2️⃣ Load all resources
+  useEffect(() => {
+    axios
+      .get('http://localhost:5001/resources', { withCredentials: true })
+      .then(res => {
+        const mapped = res.data.map(r => ({
+          id:          r.resource_id,
+          creatorId:   r.user_id,
+          creatorRole: r.creator_role.toLowerCase(),
+          title:       r.title,
+          description: r.description,
+          type:        r.resource_type === 'Video' ? 'Video' : 'PDF',
+          date:        r.upload_date,
+          url:         r.url,
+        }));
+        setResources(mapped);
+      })
+      .catch(console.error);
+  }, []);
+
+  // 3️⃣ Fetch mentor & mentee IDs for role‑based filters
+  useEffect(() => {
+    axios
+      .get('http://localhost:5001/mentors', { withCredentials: true })
+      .then(res => setMentorIds(new Set(res.data.map(m => m.mentor_id))))
+      .catch(console.error);
+
+    axios
+      .get('http://localhost:5001/mentees', { withCredentials: true })
+      .then(res => setMenteeIds(new Set(res.data.map(m => m.mentee_id))))
+      .catch(console.error);
   }, []);
 
 
-  const [showAddForm, setShowAddForm] = useState(false);
-      const [newResource, setNewResource] = useState({
-        title: '',
-        type: '',
-        visibility: '',
-        createdBy: '',
-        format: '',
-        url: '',
-        description: '',
-      });
 
-  
-      
-  const handleNewResourceChange = (e) => {
-    setNewResource({ ...newResource, [e.target.name]: e.target.value });
-  };
+    // the FilterBar already gives us exactly the strings we need:
+    const activeFilter = filter;  // 'all' | 'my' | 'global' | 'mentor' | 'mentee' | 'videos'
 
-  const handleAddResource = () => {
-    const resourceToAdd = {
-      id: resources.length + 1,
-      date: new Date().toISOString().split('T')[0],
-      ...newResource,
-      createdBy: role,
-      visibility: newResource.visibility,
-    };
-    setResources([...resources, resourceToAdd]);
-    setNewResource({
-      title: '',
-      type: '',
-      visibility: '',
-      createdBy: '',
-      format: '',
-      url: '',
-      description: '',
-    });
-    setShowAddForm(false);
-  };
 
-  const handleResourceClick = (resource) => {
-    if (resource.format === 'video' && resource.url) {
-      window.open(resource.url, '_blank');
+  // ── your four buckets ───────────────────────────────────────────
+  const myResources     = resources.filter(r => r.creatorId === userId);
+  const globalResources = resources.filter(r => r.creatorId !== userId);
+  const videoResources  = resources.filter(r => r.type === 'Video');
+  const mentorResources = resources.filter(r => r.creatorRole === 'mentor');
+  const menteeResources = resources.filter(r => r.creatorRole === 'mentee');
+
+  // ── click / redirect handlers ───────────────────────────────────
+  const handleResourceClick = r => {
+    if (r.type === 'Video' && r.url) {
+      setPendingVideoUrl(r.url);
+      setShowRedirectModal(true);
     } else {
-      setSelectedResource(resource);
+      setSelectedResource(r);
       setShowModal(true);
     }
   };
-  
-    
+  const confirmRedirect = () => {
+    window.open(pendingVideoUrl, '_blank');
+    setShowRedirectModal(false);
+    setPendingVideoUrl(null);
+  };
+  const cancelRedirect = () => {
+    setShowRedirectModal(false);
+    setPendingVideoUrl(null);
+  };
 
-  // State to hold the current filter selection
-  const [filter, setFilter] = useState('all'); 
-  // e.g., "my", "global", "math", "mentor", "mentee", "videos", etc.
+  // ── new‑resource form ────────────────────────────────────────────
+  const handleNewResourceChange = e =>
+    setNewResource({ ...newResource, [e.target.name]: e.target.value });
 
-  // Filter the resources based on the user's selection
-  const filteredResources = resources.filter((resource) => {
-    if (filter === 'all') return true;
-    if (filter === 'my' && resource.visibility === 'my') return true;
-    if (filter === 'global' && resource.visibility === 'global') return true;
-    if (filter === 'math' && resource.type === 'math') return true;
-    if (filter === 'mentor' && resource.createdBy === 'mentor') return true;
-    if (filter === 'mentee' && resource.createdBy === 'mentee') return true;
-    if (filter === 'videos' && resource.format === 'video') return true;
-    return false;
-  });
+  const handleAddResource = () => {
+    const payload = {
+      title:         newResource.title,
+      description:   newResource.description || '',
+      resource_type: newResource.type === 'video' ? 'Video' : 'PDF',
+      url:           newResource.url || '',
+    };
 
-  // Separate "my resources" from "global resources"
-  // after they are filtered
-  const myResources = filteredResources.filter(r => r.visibility === 'my');
-  const globalResources = filteredResources.filter(r => r.visibility === 'global');
-  const mentorResources = myResources.filter(r => r.createdBy === 'mentor');
-  const menteeResources = myResources.filter(r => r.createdBy === 'mentee');
-
-
-
+    axios
+      .post('http://localhost:5001/resources', payload, { withCredentials: true })
+      .then(() => axios.get('http://localhost:5001/resources', { withCredentials: true }))
+      .then(res => {
+        const mapped = res.data.map(r => ({
+          id:          r.resource_id,
+          creatorId:   r.user_id,
+          title:       r.title,
+          description: r.description,
+          type:        r.resource_type === 'Video' ? 'Video' : 'PDF',
+          date:        r.upload_date,
+          url:         r.url,
+        }));
+        setResources(mapped);
+        setShowAddForm(false);
+        setNewResource({ title: '', type: '', url: '', description: '' });
+      })
+      .catch(console.error);
+  };
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Header at the top */}
       <Header />
-
       <div className="flex">
-        {/* Filter bar on the left */}
         <FilterBar filter={filter} setFilter={setFilter} />
 
-        {/* Main content on the right */}
         <div className="flex-1 p-4">
-          {/* Scrollable container */}
           <div className="h-[80vh] overflow-y-auto border p-4">
-            {/* MY RESOURCES */}
-
-
-            <h2 className="text-xl font-bold mb-2">My Resources</h2>
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              {(role === 'mentor' ? mentorResources : menteeResources).map((res) => (
-                <div
-                key={res.id}
-                onClick={() => handleResourceClick(res)}
-                className="border p-16 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
-                <div className="text-gray-800 text-lg mb-2">{res.title}</div>
-                <div className="text-gray-500 text-sm">Date: {res.date}</div>
+            {/* ─── ALL / MY / GLOBAL ─────────────────────────────── */}
+            {(activeFilter === 'all' || activeFilter === 'my') && (
+              <>
+                <h2 className="text-xl font-bold mb-2">My Resources</h2>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  {myResources.length > 0
+                    ? myResources.map(r => (
+                        <div
+                          key={r.id}
+                          onClick={() => handleResourceClick(r)}
+                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                        >
+                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                        </div>
+                      ))
+                    : <p className="text-gray-500">No resources found.</p>}
                 </div>
-              ))}
-
-            {(role === 'mentor' ? mentorResources : menteeResources).length === 0 && (
-              <p classname="text-gray-500">No resources found.</p>
+              </>
             )}
-            </div>
 
-          <button
-            className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
-            onClick={() => setShowAddForm(true)}
-          >
-            +
-          </button>
+            {(activeFilter === 'all' || activeFilter === 'global') && (
+              <>
+                <h2 className="text-xl font-bold mb-2">Global Resources</h2>
+                <div className="grid grid-cols-3 gap-4 mb-10">
+                  {globalResources.length > 0
+                    ? globalResources.map(r => (
+                        <div
+                          key={r.id}
+                          onClick={() => handleResourceClick(r)}
+                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                        >
+                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                        </div>
+                      ))
+                    : <p className="text-gray-500">No global resources found.</p>}
+                </div>
+              </>
+            )}
 
+            {/* ─── VIDEOS ONLY ──────────────────────────────────────── */}
+            {activeFilter === 'videos' && (
+              <>
+                <h2 className="text-xl font-bold mb-4">All Videos</h2>
+                <div className="grid grid-cols-3 gap-4 mb-10">
+                  {videoResources.length > 0
+                    ? videoResources.map(r => (
+                        <div
+                          key={r.id}
+                          onClick={() => handleResourceClick(r)}
+                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                        >
+                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                        </div>
+                      ))
+                    : <p className="text-gray-500">No videos found.</p>}
+                </div>
+              </>
+            )}
 
-          {showAddForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <h2 className="text-xl font-bold mb-4">Add New Resource</h2>
+            {/* ─── MENTOR‑CREATED ─────────────────────────────────── */}
+            {activeFilter === 'mentor' && (
+              <>
+                <h2 className="text-xl font-bold mb-4">Mentor‑Created Resources</h2>
+                <div className="grid grid-cols-3 gap-4 mb-10">
+                  {mentorResources.length > 0
+                    ? mentorResources.map(r => (
+                        <div
+                          key={r.id}
+                          onClick={() => handleResourceClick(r)}
+                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                        >
+                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                        </div>
+                      ))
+                    : <p className="text-gray-500">No mentor resources found.</p>}
+                </div>
+              </>
+            )}
 
-                <input
-                  type="text"
-                  name="title"
-                  placeholder="Title"
-                  value={newResource.title}
-                  onChange={handleNewResourceChange}
-                  className="w-full mb-3 p-2 border rounded"
-                />
+            {/* ─── MENTEE‑CREATED ─────────────────────────────────── */}
+            {activeFilter === 'mentee' && (
+              <>
+                <h2 className="text-xl font-bold mb-4">Mentee‑Created Resources</h2>
+                <div className="grid grid-cols-3 gap-4 mb-10">
+                  {menteeResources.length > 0
+                    ? menteeResources.map(r => (
+                        <div
+                          key={r.id}
+                          onClick={() => handleResourceClick(r)}
+                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                        >
+                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                        </div>
+                      ))
+                    : <p className="text-gray-500">No mentee resources found.</p>}
+                </div>
+              </>
+            )}
 
-                <input
-                  type="text"
-                  name="type"
-                  placeholder="Type (e.g., math, science)"
-                  value={newResource.type}
-                  onChange={handleNewResourceChange}
-                  className="w-full mb-3 p-2 border rounded"
-                />
+            {/* ─── ADD NEW RESOURCE ─────────────────────────────────── */}
+            <button
+              className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
+              onClick={() => setShowAddForm(true)}
+            >
+              +
+            </button>
 
-                <select
-                  name="visibility"
-                  value={newResource.visibility}
-                  onChange={handleNewResourceChange}
-                  className="w-full mb-3 p-2 border rounded"
-                >
-                  <option value="">Select Visibility</option>
-                  <option value="my">Private (My Resource)</option>
-                  <option value="global">Public (Global Resource)</option>
-                </select>
-
-                <select
-                  name="format"
-                  value={newResource.format}
-                  onChange={handleNewResourceChange}
-                  className="w-full mb-3 p-2 border rounded"
-                >
-                  <option value="">Select Format</option>
-                  <option value="video">Video</option>
-                  <option value="pdf">Article</option>
-                </select>
-
-                {/* Conditional fields based on format */}
-                {newResource.format === 'video' && (
+            {showAddForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                  <h2 className="text-xl font-bold mb-4">Add New Resource</h2>
                   <input
                     type="text"
-                    name="url"
-                    placeholder="YouTube URL"
-                    value={newResource.url}
+                    name="title"
+                    placeholder="Title"
+                    value={newResource.title}
                     onChange={handleNewResourceChange}
                     className="w-full mb-3 p-2 border rounded"
                   />
-                )}
 
-                {newResource.format === 'pdf' && (
-                  <textarea
-                    name="description"
-                    placeholder="Short description of the article"
-                    value={newResource.description}
+                  <select
+                    name="type"
+                    value={newResource.type}
                     onChange={handleNewResourceChange}
                     className="w-full mb-3 p-2 border rounded"
-                  />
-                )}
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleAddResource}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
                   >
-                    Add
-                  </button>
+                    <option value="">Select Format</option>
+                    <option value="video">Video</option>
+                    <option value="pdf">Article</option>
+                  </select>
+
+                  {newResource.type === 'video' && (
+                    <input
+                      type="text"
+                      name="url"
+                      placeholder="YouTube URL"
+                      value={newResource.url}
+                      onChange={handleNewResourceChange}
+                      className="w-full mb-3 p-2 border rounded"
+                    />
+                  )}
+
+                  {newResource.type === 'pdf' && (
+                    <textarea
+                      name="description"
+                      placeholder="Short description"
+                      value={newResource.description}
+                      onChange={handleNewResourceChange}
+                      className="w-full mb-3 p-2 border rounded"
+                    />
+                  )}
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={handleAddResource}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => setShowAddForm(false)}
+                      className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {showModal && selectedResource && (
+            <ResourceModal
+              resource={selectedResource}
+              onClose={() => {
+                setShowModal(false);
+                setSelectedResource(null);
+              }}
+            />
+          )}
+
+          {showRedirectModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+                <h3 className="text-lg font-semibold mb-4">
+                  You’re being redirected
+                </h3>
+                <p className="mb-6">
+                  This will open a YouTube video in a new tab.
+                </p>
+                <div className="flex justify-end gap-3">
                   <button
-                    onClick={() => setShowAddForm(false)}
-                    className="ml-2 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition"
+                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 transition"
+                    onClick={cancelRedirect}
                   >
                     Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                    onClick={confirmRedirect}
+                  >
+                    Yes
                   </button>
                 </div>
               </div>
             </div>
           )}
-
-            {showModal && selectedResource && (
-              <ResourceModal
-                resource={selectedResource}
-                onClose={() => setShowModal(false)}
-              />
-            )}
-
-
-            {/* </div> */}
-
-            {/* GLOBAL RESOURCES */}
-            <h2 className="text-xl font-bold mb-2">Global Resources</h2>
-            <div className="grid grid-cols-3 gap-4">
-              {globalResources.map((res) => (
-                <div 
-                  key={res.id} 
-                  className="border p-16 flex flex-col items-center 
-                             justify-center hover:shadow-md transition-shadow"
-                >
-                  <div className="text-gray-800 text-lg mb-2">{res.title}</div>
-                  <div className="text-gray-500 text-sm">Date: {res.date}</div>
-                </div>
-              ))}
-              {globalResources.length === 0 && (
-                <p className="text-gray-500">No resources found.</p>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -299,3 +364,4 @@ function Resources() {
 }
 
 export default Resources;
+
