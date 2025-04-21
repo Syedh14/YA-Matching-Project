@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
+import axios from 'axios';
   
 const MenteeDashboard = () => {
   const [showMenteeModal, setShowMenteeModal] = useState(false);
   const [confirmedSessions, setConfirmedSessions] = useState([]);
   const [potentialSessions, setPotentialSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState(null);
+  const [assignedMentees, setAssignedMentees] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -20,6 +22,11 @@ const MenteeDashboard = () => {
     location: ""
   });  
   const [selectedMentee, setSelectedMentee] = useState(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackScore, setFeedbackScore] = useState(3);
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [showFeedbackList, setShowFeedbackList] = useState(false);
+  const [feedbackList, setFeedbackList] = useState([]);
 
 
   useEffect(() => {
@@ -72,40 +79,56 @@ const MenteeDashboard = () => {
     setConfirmedSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
   };
 
-  const matchedMentees = [
-    {
-      id: 5,
-      name: "Charlie Brown",
-      phone: "555-123-4567",
-      email: "charlie.brown@example.com",
-      goals: "Learn full-stack dev",
-      dateJoined: "2024-03-15",
-      skills: "React, Node.js",
-      institution: "University of XYZ",
-      status: "Undergraduate"
-    },
-    {
-      id: 6,
-      name: "Dana Lee",
-      phone: "555-987-6543",
-      email: "dana.lee@example.com",
-      goals: "Build a portfolio",
-      dateJoined: "2024-04-01",
-      skills: "HTML, CSS, JavaScript",
-      institution: "Polytechnic Institute",
-      status: "Diploma Student"
-    }
-  ];
+  useEffect(() => {
+    const fetchMentees = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/feedback/mentor/mentees', { withCredentials: true });
+        setAssignedMentees(response.data);
+      } catch (error) {
+        console.error('Failed to fetch mentees:', error);
+      }
+    };
+    fetchMentees();
+  }, []);
   
-  
+const loadMyFeedback = async () => {
+       try {
+         const { data } = await axios.get(
+           'http://localhost:5001/feedback',
+           { withCredentials: true }
+         );
+         setFeedbackList(data);
+         setShowFeedbackList(true);
+       } catch (err) {
+         console.error(err);
+         alert('Could not load feedback.');
+       }
+     };
+const submitFeedback = async () => {
+         try {
+           await axios.post('http://localhost:5001/feedback', {
+             otherId:       selectedMentee.id,   // mentee_id
+             score:         feedbackScore,
+             comment:       feedbackComment
+           }, { withCredentials: true });
+           setShowFeedbackModal(false);
+           setFeedbackScore(3);
+           setFeedbackComment('');
+           alert('Feedback submitted!');
+         } catch (err) {
+           console.error(err);
+           alert('Failed to submit feedback.');
+         }
+       };
+
   
 
   return (
     <div>
       <Header />
       <div className="flex p-6 gap-6 items-start">
-        {/* Confirmed Sessions (slightly smaller) */}
-        <div className="flex-[2] bg-white p-4 rounded shadow">
+        
+        <div className="flex-[3] bg-white p-4 rounded shadow">
           <h2 className="text-lg font-bold mb-4">My Confirmed Sessions</h2>
 
           <div className="space-y-4">
@@ -180,8 +203,35 @@ const MenteeDashboard = () => {
             <br />
             <span className="text-xs">(click here for details)</span>
           </button>
-  
-          <div className="w-full bg-white p-4 rounded shadow">
+            
+          {/* View Feedback button */}
+          <button
+            onClick={loadMyFeedback}
+            className="w-full bg-secondary text-white py-2 rounded hover:bg-primary transition"
+          >
+            View Feedback
+          </button>
+
+          {/* Feedback List */}
+          {showFeedbackList && (
+            <div className="w-full bg-white p-4 rounded shadow mt-2 max-h-64 overflow-auto">
+              <h3 className="text-lg font-bold mb-2">Feedback Received</h3>
+              <ul className="space-y-2 text-sm">
+                {feedbackList.map((fb, i) => (
+                  <li key={i} className="border-b pb-2">
+                    <p><strong>From Mentee ID:</strong> {fb.mentee_id}</p>
+                    <p><strong>Score:</strong> {fb.feedback_score}</p>
+                    <p><strong>Comment:</strong> {fb.comments}</p>
+                  </li>
+                ))}
+                {feedbackList.length === 0 && <li>No feedback yet.</li>}
+              </ul>
+            </div>
+          )}
+        </div>
+        
+
+          <div className="w-flex[1] bg-white p-4 rounded shadow">
             <h2 className="text-lg font-bold mb-4">Potential Sessions</h2>
             <ul className="space-y-2">
               {potentialSessions.map((s, i) => (
@@ -207,7 +257,7 @@ const MenteeDashboard = () => {
               ))}
             </ul>
           </div>
-        </div>
+        
   
         {showModal && selectedSession && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -263,16 +313,20 @@ const MenteeDashboard = () => {
 
             {!selectedMentee ? (
               <div className="space-y-4">
-                {matchedMentees.map((mentee) => (
-                  <div
-                    key={mentee.id}
-                    onClick={() => setSelectedMentee(mentee)}
-                    className="cursor-pointer px-4 py-2 border rounded-lg hover:bg-primary hover:text-black transition"
-                  >
-                    <p className="text-lg font-medium">{mentee.name}</p>
-                    <p className="text-sm text-gray-500">ID: {mentee.id}</p>
-                  </div>
-                ))}
+                {assignedMentees.length === 0 ? (
+                  <p>No mentees assigned.</p>
+                ) : (
+                  assignedMentees.map((mentee) => (
+                    <div
+                      key={mentee.id}
+                      onClick={() => setSelectedMentee(mentee)}
+                      className="cursor-pointer px-4 py-2 border rounded-lg hover:bg-primary hover:text-black transition"
+                    >
+                      <p className="text-lg font-medium">{mentee.name}</p>
+                      <p className="text-sm text-gray-500">ID: {mentee.id}</p>
+                    </div>
+                  ))
+                )}
               </div>
             ) : (
               <div className="space-y-2">
@@ -297,6 +351,14 @@ const MenteeDashboard = () => {
                   Back
                 </button>
               )}
+              {selectedMentee && (
+             <button
+               onClick={() => setShowFeedbackModal(true)}
+               className="bg-secondary text-white px-4 py-2 rounded hover:bg-primary"
+             >
+               Add Feedback
+             </button>
+           )}
             </div>
           </div>
         </div>
@@ -402,6 +464,44 @@ const MenteeDashboard = () => {
           </div>
         </div>
       )}
+            {showFeedbackModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-11/12 max-w-md">
+            <h3 className="text-xl font-bold mb-4">Add Feedback</h3>
+            <div className="space-y-3">
+              <label className="block text-sm">Score (1–5)</label>
+              <input
+                type="number" min="1" max="5"
+                value={feedbackScore}
+                onChange={e => setFeedbackScore(e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+              <label className="block text-sm">Comment</label>
+              <textarea
+                rows="3"
+                value={feedbackComment}
+                onChange={e => setFeedbackComment(e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setShowFeedbackModal(false)}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitFeedback}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </div>
   );
