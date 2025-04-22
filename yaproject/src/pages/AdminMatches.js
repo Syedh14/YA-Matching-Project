@@ -39,6 +39,39 @@ const AiMatches = () => {
       setIsModalOpen(false);
     };
 
+    const handleApprove = (matchId) => {
+      axios
+        .post(
+          `http://localhost:5001/admin/matches/${matchId}/approve`,
+          {},
+          { withCredentials: true }
+        )
+        .then(() => {
+          // Remove approved match from list
+          setMatches(prev => prev.filter(m => m.id !== matchId));
+        })
+        .catch(err => console.error("Approve failed:", err));
+    };
+  
+    // Reject handler: deletes old match and fetches a new one
+    const handleReject = (matchId) => {
+      axios
+        .post(
+          `http://localhost:5001/admin/matches/${matchId}/reject`,
+          {},
+          { withCredentials: true }
+        )
+        .then(({ data: { newMatch } }) => {
+          // Replace old match with the newly suggested one
+          setMatches(prev =>
+            prev
+              .filter(m => m.id !== matchId)
+              .concat(newMatch)
+              .sort((a, b) => b.id - a.id)
+          );
+        })
+        .catch(err => console.error("Reject failed:", err));
+    };
     const handleButtonClick = (id) => {
         setMatches(prev => prev.filter(match => match.id !== id));
     };
@@ -68,17 +101,13 @@ const AiMatches = () => {
         <div className="p-6">
           <h2 className="text-2xl font-semibold mb-10">Potential Matches:</h2>
           <div className="max-h-[46rem] overflow-y-auto space-y-4 pr-2">
-            {matches.length === 0 && (
+            {matches.length === 0 ? (
               <p className="text-center text-gray-600">No matches found.</p>
-            )}
-            {matches.map(match => (
-              <div
-                key={match.id}
-                className="flex flex-col md:flex-row md:items-center md:justify-between bg-white border rounded-xl p-4 shadow-sm"
-              >
-                <button
-                  onClick={() => openModal(match)}
-                  className="text-lg mb-2 md:mb-0 bg-gray-100 hover:bg-gray-200 text-left p-6 rounded-md transition w-full md:w-auto"
+            ) : (
+              matches.map(match => (
+                <div
+                  key={match.id}
+                  className="flex flex-col md:flex-row md:items-center md:justify-between bg-white border rounded-xl p-4 shadow-sm"
                 >
                   <strong className="font-bold text-secondary">
                     {match.mentor}
@@ -97,17 +126,39 @@ const AiMatches = () => {
                     Approve
                   </button>
                   <button
-                    onClick={() => handleButtonClick(match.id)}
-                    className="bg-secondary text-white font-semibold px-6 py-3 rounded-md hover:bg-primary hover:text-black transition text-lg"
+                    onClick={() => openModal(match)}
+                    className="text-lg mb-2 md:mb-0 bg-gray-100 hover:bg-gray-200 text-left p-6 rounded-md transition w-full md:w-auto"
                   >
-                    Reject
+                    <strong className="font-bold text-secondary">
+                      {match.mentor}
+                    </strong>{" "}
+                    Matched With{" "}
+                    <strong className="font-bold text-secondary">
+                      {match.mentee}
+                    </strong>
                   </button>
+  
+                  <div className="flex gap-6">
+                    <button
+                      onClick={() => handleApprove(match.id)}
+                      className="bg-secondary text-white font-semibold px-6 py-3 rounded-md hover:bg-primary hover:text-black transition text-lg"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleReject(match.id)}
+                      className="bg-secondary text-white font-semibold px-6 py-3 rounded-md hover:bg-primary hover:text-black transition text-lg"
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
   
+        {/* Match Details Modal */}
         {isModalOpen && selectedMatch && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-lg relative shadow-lg">
@@ -128,8 +179,7 @@ const AiMatches = () => {
                 <span className="font-bold">Mentee:</span> {selectedMatch.mentee}
               </p>
               <p className="text-lg mt-2">
-                <span className="font-bold">Success Rate:</span>{" "}
-                {selectedMatch.successRate}
+                <span className="font-bold">Success Rate:</span> {selectedMatch.successRate}
               </p>
               <p className="text-lg mt-2">
                 <span className="font-bold">AI Model:</span> {selectedMatch.model}
