@@ -125,25 +125,24 @@ router.post("/signup", (req, res) => {
               academicBackground
             ];
             //db.query(mentorQuery, mentorValues, finishSignup);
-            db.query(mentorQuery, mentorValues, err => {
-                            if (err) return finishSignup(err);
-              
-                            if (!availability.length) {
-                              return finishSignup();
-                            }
-              
-                            // IGNORE duplicates, bulk‑insert the rest
-                            const availSql = `
-                              INSERT IGNORE INTO Mentor_Availability (mentor_id, available_date)
-                              VALUES ?
-                            `;
-                            const availVals = availability.map(dt => [ userId, dt ]);
-              
-                            db.query(availSql, [ availVals ], ignErr => {
-                              if (ignErr) return finishSignup(ignErr);
-                              finishSignup();
-                            });
-                          });
+            db.query(mentorQuery, mentorValues, (err) => {
+              if (err) return finishSignup(err);
+
+              // now insert availability slots for this mentor
+              if (availability.length) {
+                const availSql = `
+                  INSERT INTO Mentor_Availability (mentor_id, available_date)
+                  VALUES ?
+                `;
+                const availVals = availability.map(dt => [userId, dt]);
+                db.query(availSql, [availVals], (err) => {
+                  if (err) return finishSignup(err);
+                  finishSignup();    
+                });
+              } else {
+                finishSignup();
+              }
+            });
               
 
           } else if (role === "Mentee") {
@@ -161,107 +160,123 @@ router.post("/signup", (req, res) => {
               institution
             ];
             //db.query(menteeQuery, menteeValues, finishSignup);
-            db.query(menteeQuery, menteeValues, err => {
-                            if (err) return finishSignup(err);
-              
-                            if (!availability.length) {
-                              return finishSignup();
-                            }
-              
-                            // IGNORE duplicates, bulk‑insert the rest
-                            const availSql = `
-                              INSERT IGNORE INTO Mentee_Availability (mentee_id, available_date)
-                              VALUES ?
-                            `;
-                            const availVals = availability.map(dt => [ userId, dt ]);
-              
-                            db.query(availSql, [ availVals ], ignErr => {
-                              if (ignErr) return finishSignup(ignErr);
-                              finishSignup();
-                            });
-                          });
-          
-          // 2. finishSignup now responds *and* then triggers runMatching in background
-    function finishSignup(err) {
-      if (err) {
-        console.error("Role-specific insert error:", err);
-        return res.status(500).json({ error: err.message });
-      }
-
-      // respond immediately
-      res.status(201).json({
-        message: "Signup successful",
-        userId: userId
-      });
-
-      // → trigger AI match asynchronously
-      (async () => {
-        try {
-          // a) load the mentee back (with availability)
-          const [menteeRows] = await db.promise().query(
-            `SELECT m.mentee_id AS id, m.skills, m.academic_status, m.goals,
-                    m.date_joined, m.institution,
-                    JSON_ARRAYAGG(ma.available_date) AS availability
-               FROM Mentees m
-               LEFT JOIN Mentee_Availability ma
-                 ON m.mentee_id = ma.mentee_id
-              WHERE m.mentee_id = ?`,
-            [userId]
-          );
-          const mentee = { ...menteeRows[0], availability: JSON.parse(menteeRows[0].availability) };
-
-          // b) load all mentors (with availability)
-          const [mentorRows] = await db.promise().query(
-            `SELECT t.*,
-                    JSON_ARRAYAGG(ma.available_date) AS availability
-               FROM (
-                    SELECT 
-                      mentor_id AS id,
-                      skills,
-                      academic_background,
-                      active_status,
-                      date_joined,
-                      mentee_assigned_count
-                    FROM Mentors
-                    WHERE active_status = TRUE
-                    ) AS t
-               LEFT JOIN Mentor_Availability ma
-                 ON t.id = ma.mentor_id
-              GROUP BY t.id`
-          );
-          const mentors = mentorRows.map(r => ({
-            ...r,
-            availability: JSON.parse(r.availability)
-          }));
-
-          // c) call Gemini
-          const aiOutput = await runMatching(mentee, mentors, 1);
-          const match = JSON.parse(aiOutput);
-          console.log(aiOutput);
-
-          // d) insert into Matches
-          await db.promise().query(
-            `INSERT INTO Matches
-               (mentor_id, mentee_id, admin_id, ai_model, match_date, success_rate, match_approval_status)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [
-              match.mentor_id,
-              match.mentee_id,
-              match.admin_id,
-              match.ai_model,
-              match.match_date,
-              match.success_rate,
-              match.match_approval_status
-            ]
-          );
-          console.log("✅ AI match inserted for mentee", userId);
-        } catch (e) {
-          console.error("❌ AI match error for mentee", userId, e);
-        }
-      })();
-    }
+            db.query(menteeQuery, menteeValues, (err) => {
+                if (err) return finishSignupWithGemini(err);
   
-    
+                // now insert availability slots for this mentee
+                if (availability.length) {
+                  const availSql = `
+                    INSERT INTO Mentee_Availability (mentee_id, available_date)
+                    VALUES ?
+                  `;
+                  const availVals = availability.map(dt => [userId, dt]);
+                  db.query(availSql, [availVals], (err) => {
+                    if (err) return finishSignupWithGemini(err);
+                    finishSignupWithGemini();
+                  });
+                } else {
+                  finishSignupWithGemini();
+                }
+              });    
+
+
+
+              function finishSignupWithGemini(err) {
+                if (err) {
+                  console.error("Role-specific insert error:", err);
+                  return res.status(500).json({ error: err.message });
+                }
+              
+                // respond immediately
+                res.status(201).json({
+                  message: "Signup successful",
+                  userId: userId
+                });
+              
+                // → trigger AI match asynchronously
+                const menteeQuery = `
+                  SELECT m.mentee_id AS id, m.skills, m.academic_status, m.goals,
+                         m.date_joined, m.institution,
+                         JSON_ARRAYAGG(ma.available_date) AS availability
+                    FROM Mentees m
+                    LEFT JOIN Mentee_Availability ma ON m.mentee_id = ma.mentee_id
+                   WHERE m.mentee_id = ?
+                `;
+              
+                db.query(menteeQuery, [userId], (err1, menteeRows) => {
+                  if (err1 || menteeRows.length === 0) {
+                    console.error("❌ Error fetching mentee:", err1 || "Mentee not found");
+                    return;
+                  }
+              
+                  const mentee = {
+                    ...menteeRows[0],
+                    availability: JSON.parse(menteeRows[0].availability)
+                  };
+              
+                  const mentorQuery = `
+                    SELECT t.*, JSON_ARRAYAGG(ma.available_date) AS availability
+                    FROM (
+                      SELECT 
+                        mentor_id AS id,
+                        skills,
+                        academic_background,
+                        active_status,
+                        date_joined,
+                        mentee_assigned_count
+                      FROM Mentors
+                      WHERE active_status = TRUE
+                    ) AS t
+                    LEFT JOIN Mentor_Availability ma ON t.id = ma.mentor_id
+                    GROUP BY t.id
+                  `;
+              
+                  db.query(mentorQuery, async (err2, mentorRows) => {
+                    if (err2) {
+                      console.error("❌ Error fetching mentors:", err2);
+                      return;
+                    }
+              
+                    const mentors = mentorRows.map(r => ({
+                      ...r,
+                      availability: JSON.parse(r.availability)
+                    }));
+              
+                    try {
+                      const aiOutput = await runMatching(mentee, mentors);
+                      const match = JSON.parse(aiOutput);
+                      console.log("✅ AI Response:", match);
+              
+                      const insertMatchQuery = `
+                        INSERT INTO Matches
+                          (mentor_id, mentee_id, admin_id, ai_model, match_date, success_rate, match_approval_status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                      `;
+              
+                      const values = [
+                        match.mentor_id,
+                        match.mentee_id,
+                        match.admin_id,
+                        match.ai_model,
+                        match.match_date,
+                        match.success_rate,
+                        match.match_approval_status
+                      ];
+              
+                      db.query(insertMatchQuery, values, (err3) => {
+                        if (err3) {
+                          console.error("❌ Error inserting match:", err3);
+                          return;
+                        }
+                        console.log("✅ AI match inserted for mentee", userId);
+                      });
+                    } catch (e) {
+                      console.error("❌ AI match error for mentee", userId, e);
+                    }
+                  });
+                });
+              }
+              
           } else if (role === "Admin") {
             const adminQuery = `
               INSERT INTO Admins (admin_id, permission)
