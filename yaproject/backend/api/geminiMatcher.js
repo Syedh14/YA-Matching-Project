@@ -74,19 +74,19 @@ async function generateCompletion(prompt) {
 
 export async function runMatching(mentee, mentors) {
   try {
-    console.log("⚙️ Generating prompt...");
+    console.log("Generating prompt...");
     console.log(mentors);
     const prompt = buildMatchingPrompt(mentee, mentors);
-    console.log("📤 Prompt:\n", prompt);
+    console.log("Prompt:\n", prompt);
 
     const output = await generateCompletion(prompt);
-    console.log("✅ Gemini response:\n", output);
+    console.log("Gemini response:\n", output);
 
     const cleanedOutput = output.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
 
     return cleanedOutput;
   } catch (err) {
-    console.error("❌ Error in runMatching:", err.message);
+    console.error("Error in runMatching:", err.message);
     // Return a string, not an object, so JSON.parse doesn't crash
     return `Error: ${err.message}`;
   }
