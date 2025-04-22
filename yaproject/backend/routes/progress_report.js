@@ -62,23 +62,21 @@ router.get('/mentee/:menteeId', (req, res) => {
 //   );
 // });
 
-// GET: only the mentees I (the mentor) have reports for
+// NEW: every mentee assigned to me in Manages
 router.get('/mentor/:mentorId/mentees', (req, res) => {
   const { mentorId } = req.params;
-
   const sql = `
-    SELECT DISTINCT
-      pr.mentee_id AS id,
+    SELECT
+      m.mentee_id AS id,
       CONCAT(u.first_name, ' ', u.last_name) AS name
-    FROM Progress_Reports AS pr
-    JOIN Users             AS u
-      ON u.user_id = pr.mentee_id
-    WHERE pr.mentor_id = ?
+    FROM Manages AS m
+    JOIN Users   AS u
+      ON u.user_id = m.mentee_id
+    WHERE m.mentor_id = ?
   `;
-
   db.query(sql, [mentorId], (err, rows) => {
     if (err) {
-      console.error('❌ Error fetching mentees for mentor:', err);
+      console.error('❌ Error fetching assigned mentees:', err);
       return res.status(500).json({ error: 'Server error' });
     }
     res.json(rows);

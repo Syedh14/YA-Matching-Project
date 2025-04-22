@@ -89,6 +89,7 @@ router.get('/mentor/mentees', (req, res) => {
   if (!mentorId || req.session.userRole !== 'Mentor') {
     return res.status(403).send('Unauthorized');
   }
+
   const sql = `
     SELECT 
       m.mentee_id,
@@ -101,15 +102,18 @@ router.get('/mentor/mentees', (req, res) => {
       m.institution,
       (SELECT email FROM Emails WHERE user_id = m.mentee_id LIMIT 1) as email,
       (SELECT phone FROM Phones WHERE user_id = m.mentee_id LIMIT 1) as phone
-    FROM Mentees m
+    FROM Manages mg
+    JOIN Mentees m ON mg.mentee_id = m.mentee_id
     JOIN Users u ON m.mentee_id = u.user_id
-    WHERE m.mentor_id = ?
+    WHERE mg.mentor_id = ?
   `;
+
   db.query(sql, [mentorId], (err, results) => {
     if (err) {
-      console.error(err);
+      console.error("❌ Error fetching mentees:", err);
       return res.status(500).send('Server error');
     }
+
     const mentees = results.map(row => ({
       id: row.mentee_id,
       name: `${row.first_name} ${row.last_name}`,
@@ -121,15 +125,18 @@ router.get('/mentor/mentees', (req, res) => {
       institution: row.institution,
       status: row.academic_status
     }));
+
     res.json(mentees);
   });
 });
+
 
 router.get('/mentee/mentor', (req, res) => {
   const menteeId = req.session.userId;
   if (!menteeId || req.session.userRole !== 'Mentee') {
     return res.status(403).send('Unauthorized');
   }
+
   const sql = `
     SELECT 
       m.mentor_id,
@@ -141,11 +148,12 @@ router.get('/mentee/mentor', (req, res) => {
       m.academic_background,
       (SELECT email FROM Emails WHERE user_id = m.mentor_id LIMIT 1) as email,
       (SELECT phone FROM Phones WHERE user_id = m.mentor_id LIMIT 1) as phone
-    FROM Mentees me
-    JOIN Mentors m ON me.mentor_id = m.mentor_id
+    FROM Manages ma
+    JOIN Mentors m ON ma.mentor_id = m.mentor_id
     JOIN Users u ON m.mentor_id = u.user_id
-    WHERE me.mentee_id = ?
+    WHERE ma.mentee_id = ?
   `;
+
   db.query(sql, [menteeId], (err, results) => {
     if (err) {
       console.error(err);
@@ -154,6 +162,7 @@ router.get('/mentee/mentor', (req, res) => {
     if (results.length === 0) {
       return res.status(404).send('No mentor assigned');
     }
+
     const mentor = results[0];
     const mentorData = {
       id: mentor.mentor_id,
@@ -165,6 +174,7 @@ router.get('/mentee/mentor', (req, res) => {
       skills: mentor.skills,
       academicBackground: mentor.academic_background
     };
+
     res.json(mentorData);
   });
 });

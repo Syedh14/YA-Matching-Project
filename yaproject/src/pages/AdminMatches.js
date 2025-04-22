@@ -4,9 +4,21 @@ import axios from "axios";
 
 
 const AiMatches = () => {
+    const [user, setUser] = useState(null);
     const [matches, setMatches] = useState([]);
     const [selectedMatch, setSelectedMatch] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+      axios.get("http://localhost:5001/auth/profile", { withCredentials: true })
+        .then(res => {
+          setUser(res.data);  
+        })
+        .catch(err => {
+          console.error("Failed to fetch profile data", err);
+          setUser(null);
+        });
+    }, []);
 
 
     useEffect(() => {
@@ -15,14 +27,16 @@ const AiMatches = () => {
         .then(res => setMatches(res.data))
         .catch(err => console.error("Failed to fetch matches:", err));
     }, []);
+
+
     const openModal = (match) => {
-    setSelectedMatch(match);
-    setIsModalOpen(true);
+      setSelectedMatch(match);
+      setIsModalOpen(true);
     };
 
     const closeModal = () => {
-    setSelectedMatch(null);
-    setIsModalOpen(false);
+      setSelectedMatch(null);
+      setIsModalOpen(false);
     };
 
     const handleApprove = (matchId) => {
@@ -62,7 +76,26 @@ const AiMatches = () => {
         setMatches(prev => prev.filter(match => match.id !== id));
     };
 
-    return(
+    const handleAccept = async (match) => {
+      try {
+        await axios.post("http://localhost:5001/admin/acceptMatch", {
+          match_id: match.id,
+          mentor_id: match.mentor_id,
+          mentee_id: match.mentee_id,
+          admin_id: user.user_id
+        }, { withCredentials: true });
+
+        setMatches(prev => prev.filter(m => m.id !== match.id));
+    
+        alert("Match accepted. Sessions generated.");
+      } catch (err) {
+        console.error("❌ Accept failed:", err);
+        alert("Error accepting match.");
+      }
+    };
+    
+
+    return (
       <div>
         <Header />
         <div className="p-6">
@@ -76,6 +109,22 @@ const AiMatches = () => {
                   key={match.id}
                   className="flex flex-col md:flex-row md:items-center md:justify-between bg-white border rounded-xl p-4 shadow-sm"
                 >
+                  <strong className="font-bold text-secondary">
+                    {match.mentor}
+                  </strong>{" "}
+                  Matched With{" "}
+                  <strong className="font-bold text-secondary">
+                    {match.mentee}
+                  </strong>
+                </button>
+  
+                <div className="flex gap-6">
+                  <button
+                    onClick={() => handleAccept(match)}
+                    className="bg-secondary text-white font-semibold px-6 py-3 rounded-md hover:bg-primary hover:text-black transition text-lg"
+                  >
+                    Approve
+                  </button>
                   <button
                     onClick={() => openModal(match)}
                     className="text-lg mb-2 md:mb-0 bg-gray-100 hover:bg-gray-200 text-left p-6 rounded-md transition w-full md:w-auto"
@@ -140,7 +189,6 @@ const AiMatches = () => {
         )}
       </div>
     );
-      
 };
 
 export default AiMatches;

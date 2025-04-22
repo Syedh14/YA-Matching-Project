@@ -146,66 +146,72 @@ function ProgressReports() {
       };
       
 
-  return (
-    <div>
-      <Header />
-      <div className="bg-white p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Progress Reports</h1>
-          <button
-            onClick={handleSortBy}
-            className="bg-secondary text-white px-4 py-2 rounded"
-          >
-            Sort By {sortBy === 'id' ? 'Date' : 'ID'}
-          </button>
-          {role === 'mentor' && (
-            <button
-              className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
-              onClick={() => setShowAddModal(true)}
-            >
-              +
-            </button>
+      return (
+        <div>
+          <Header />
+          <div className="bg-white p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-2xl font-bold">Progress Reports</h1>
+              <button
+                onClick={handleSortBy}
+                className="bg-secondary text-white px-4 py-2 rounded"
+              >
+                Sort By {sortBy === 'id' ? 'Date' : 'ID'}
+              </button>
+              {role === 'mentor' && (
+                <button
+                  className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
+                  onClick={() => setShowAddModal(true)}
+                >
+                  +
+                </button>
+              )}
+            </div>
+      
+            {sortedReports.length === 0 ? (
+              <p className="text-center text-gray-500 my-8">
+                There are no reports made yet.
+              </p>
+            ) : (
+              <div className="grid gap-4">
+                {sortedReports.map((report) => (
+                  <div
+                    key={report.report_id}
+                    className="border p-4 rounded shadow hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleCardClick(report)}
+                  >
+                    <p><strong>ID:</strong> {report.report_id}</p>
+                    <p>
+                      <strong>Date:</strong>{' '}
+                      {report.date_created
+                        ? new Date(report.date_created).toLocaleDateString()
+                        : 'N/A'}
+                    </p>
+                    <p><strong>Mentee ID:</strong> {report.mentee_id}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+      
+          {/* View Report Modal */}
+          {showModal && (
+            <ProgressReportModal report={selectedReport} onClose={closeModal} />
+          )}
+      
+          {/* Add Report Modal */}
+          {showAddModal && (
+            <AddProgressReportModal
+              newReport={newReport}
+              setNewReport={setNewReport}
+              onSubmit={handleAddReport}
+              onClose={() => setShowAddModal(false)}
+              mentees={mentees}
+            />
           )}
         </div>
-
-        {/* Render sorted reports */}
-        <div className="grid gap-4">
-             {sortedReports.map((report) => (
-              <div
-                key={report.report_id}
-                className="border p-4 rounded shadow hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleCardClick(report)}
-              >
-                <p><strong>ID:</strong> {report.report_id}</p>
-                <p>
-                  <strong>Date:</strong>{' '}
-                  {report.date_created
-                      ? new Date(report.date_created).toLocaleDateString()
-                    : 'N/A'}
-                </p>
-                <p><strong>Mentee ID:</strong> {report.mentee_id}</p>
-              </div>
-              ))}
-        </div>
-      </div>
-
-      {/* View Report Modal */}
-      {showModal && (
-        <ProgressReportModal report={selectedReport} onClose={closeModal} />
-      )}
-
-      {/* Add Report Modal */}
-      {showAddModal && (
-        <AddProgressReportModal
-          newReport={newReport}
-          setNewReport={setNewReport}
-          onSubmit={handleAddReport}
-          onClose={() => setShowAddModal(false)}
-          mentees={mentees}
-        />
-      )}
-    </div>
-  );
-}
+      );
+      }
+      
 
 export default ProgressReports;
