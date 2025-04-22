@@ -86,7 +86,31 @@ router.get("/mentors", (req, res) => {
       res.json(results);
     });
   });
-  
+
+router.get("/matches", (req, res) => {
+  const query = `
+    SELECT
+      mt.match_id   AS id,
+      CONCAT(u1.first_name, ' ', u1.last_name) AS mentor,
+      CONCAT(u2.first_name, ' ', u2.last_name) AS mentee,
+      mt.success_rate AS successRate,
+      mt.ai_model     AS model
+    FROM Matches mt
+    JOIN Users u1 ON mt.mentor_id = u1.user_id
+    JOIN Users u2 ON mt.mentee_id = u2.user_id
+    WHERE mt.match_approval_status = 'Pending'
+    ORDER BY mt.match_date DESC
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching matches:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
   
   
   
