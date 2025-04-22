@@ -268,14 +268,24 @@ function Login() {
                 placeholder="First Name"
                 className="border rounded p-2"
                 value={firstName}
-                onChange={e => setFirstName(e.target.value)}
+                onChange={e => {
+                  const raw = e.target.value;
+                  const cleaned = raw.replace(/[^a-zA-Z]/g, ''); 
+                  const capitalized = cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+                  setFirstName(capitalized);
+                }}
               />
               <input
                 type="text"
                 placeholder="Last Name"
                 className="border rounded p-2"
                 value={lastName}
-                onChange={e => setLastName(e.target.value)}
+                onChange={e => {
+                  const raw = e.target.value;
+                  const cleaned = raw.replace(/[^a-zA-Z]/g, ''); // only letters
+                  const capitalized = cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+                  setLastName(capitalized);
+                }}
               />
             </div>
             <input
@@ -313,6 +323,13 @@ function Login() {
                     className="border rounded p-2 flex-grow"
                     value={em}
                     onChange={e => emailHelpers.update(i, e.target.value)}
+                    onBlur={e => {
+                      const value = e.target.value;
+                      const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                      if (!isValidEmail && value !== "") {
+                        alert("Please enter a valid email address.");
+                      }
+                    }}
                   />
                   {emails.length > 1 && (
                     <button
@@ -344,7 +361,10 @@ function Login() {
                     placeholder="(123) 456‑7890"
                     className="border rounded p-2 flex-grow"
                     value={ph}
-                    onChange={e => phoneHelpers.update(i, e.target.value)}
+                    onChange={e => {
+                      const onlyNums = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      phoneHelpers.update(i, onlyNums);
+                    }}
                   />
                   {phones.length > 1 && (
                     <button

@@ -8,7 +8,9 @@ const ai = new GoogleGenAI({
 });
 
 function buildMatchingPrompt(mentee, mentors) {
-  let prompt = `New Mentee:\n`;
+  let prompt = `You are an AI whose sole task is to match one mentee with the best mentor.
+  
+  \nNew Mentee:\n`;
 
   if (mentee.id != null) prompt += `- ID: ${mentee.id}\n`;
   if (mentee.goals)                     prompt += `- Goals: ${mentee.goals}\n`;
@@ -55,19 +57,11 @@ Return ONLY the JSON object matching this schema, no extra text, do not include 
 }
 
 async function generateCompletion(prompt) {
-  // const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const result = await ai.models.generateContent({
     model: "gemini-2.0-flash",
     contents: prompt,
   });
-
-  // const result = await model.generateContent({
-  //   contents: [{
-  //     role: "user",
-  //     parts: [{ text: prompt }]
-  //   }]
-  // });
 
   const responseText = result.text;
 
