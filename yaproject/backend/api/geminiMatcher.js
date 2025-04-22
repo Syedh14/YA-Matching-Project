@@ -1,96 +1,93 @@
-// File: src/geminiMatcher.js
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
 
-const ai = new GoogleGenerativeAI({
-  apiKey: process.env.REACT_APP_GEMINI_API_KEY,
+dotenv.config();
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
-/**
- * 1️⃣ Exactly like your sample generate_completion:
- *    - Verifies client
- *    - Wraps the raw prompt in instructions to output only JSON
- *    - Calls Gemini
- *    - Returns response.text
- */
-async function generateCompletion(prompt, role = "mentor matcher") {
-  if (!ai) {
-    throw new Error("Google AI client not initialized");
-  }
-  
+function buildMatchingPrompt(mentee, mentors) {
+  let prompt = `New Mentee:\n`;
 
+  if (mentee.mentee_id != null)         prompt += `- ID: ${mentee.mentee_id}\n`;
+  if (mentee.goals)                     prompt += `- Goals: ${mentee.goals}\n`;
+  if (mentee.skills)                    prompt += `- Skills: ${mentee.skills}\n`;
+  if (mentee.academic_status)           prompt += `- Academic Status: ${mentee.academic_status}\n`;
+  if (mentee.date_joined)               prompt += `- Date Joined: ${mentee.date_joined}\n`;
+  if (mentee.institution)               prompt += `- Institution: ${mentee.institution}\n`;
 
-  const formattedPrompt = `
-You are an AI whose sole task is to match one mentee with the best mentor.
-Output **only** a JSON object matching our Matches table schema (no extra text).
+  prompt += `\nAvailable Mentors:\n`;
 
-${prompt}
+  mentors.forEach((m) => {
+    if (!m.active_status) return;
+    if (m.mentee_assigned_count >= 3) return;
 
-**JSON schema** (fill in each value exactly):
+    prompt += `Mentor ${m.mentor_id}:\n`;
+    if (m.goals)                       prompt += `- Goals: ${m.goals}\n`;
+    if (m.skills)                      prompt += `- Skills: ${m.skills}\n`;
+    if (m.academic_background)         prompt += `- Academic Background: ${m.academic_background}\n`;
+    if (m.active_status != null)       prompt += `- Active: ${m.active_status}\n`;
+    if (m.date_joined)                 prompt += `- Date Joined: ${m.date_joined}\n`;
+    if (m.mentee_assigned_count != null)
+                                       prompt += `- Current Mentees: ${m.mentee_assigned_count}\n`;
+    prompt += `\n`;
+  });
+
+  prompt += `
+Select the single best mentor:
+
+Prioritize skill–goal alignment
+
+Then consider availability & academic background
+
+Return ONLY the JSON object matching this schema, no extra text:
 
 {
   "mentor_id": <int>,
   "mentee_id": <int>,
-  "admin_id": 1,    
+  "admin_id": 1,
   "ai_model": "gemini-2.0-flash",
   "success_rate": <int 0–100>,
   "match_approval_status": "Pending"
 }
 `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: formattedPrompt,
-  });
-  return response.text;
+  return prompt;
 }
 
-/**
- * 2️⃣ Incrementally build the prompt exactly like your Flask route does:
- *    if field exists → append that line to the prompt.
- */
-function buildMatchingPrompt(mentee, mentors) {
-  let p = `New Mentee:\n`;
+async function generateCompletion(prompt) {
+  const model = ai.getGenerativeModel({ model: "gemini-pro" }); // ✅ THIS FIXES THE ERROR
 
-  if (mentee.mentee_id != null)       p += `- ID: ${mentee.mentee_id}\n`;
-  if (mentee.goals)                   p += `- Goals: ${mentee.goals}\n`;
-  if (mentee.skills)                  p += `- Skills: ${mentee.skills}\n`;
-  if (mentee.academic_status)         p += `- Academic Status: ${mentee.academic_status}\n`;
-  if (mentee.date_joined)             p += `- Date Joined: ${mentee.date_joined}\n`;
-  if (mentee.institution)             p += `- Institution: ${mentee.institution}\n`;
-  // note: mentor_id on a brand‑new signup will be null, so we skip it
-
-  p += `\nAvailable Mentors:\n`;
-  mentors.forEach((m) => {
-    if (!m.active_status) return; // e.g. skip inactive mentors
-    if (m.mentee_assigned_count >= 3) return;
-
-    p += `Mentor ${m.mentor_id}:\n`;
-    if (m.goals)                   p += `- Goals: ${m.goals}\n`;
-    if (m.skills)                  p += `- Skills: ${m.skills}\n`;
-    if (m.academic_background)     p += `- Academic Background: ${m.academic_background}\n`;
-    if (m.active_status != null)   p += `- Active: ${m.active_status}\n`;
-    if (m.date_joined)             p += `- Date Joined: ${m.date_joined}\n`;
-    if (m.mentee_assigned_count != null)
-                                   p += `- Current Mentees: ${m.mentee_assigned_count}\n`;
-    p += `\n`;
+  const result = await model.generateContent({
+    contents: [{
+      role: "user",
+      parts: [{ text: prompt }]
+    }]
   });
 
-  // final instruction
-  p += `Select the single best mentor:
-- Prioritize skill–goals match
-- Then availability & academic background.`;
+  const responseText = result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-  return p;
+  if (!responseText) {
+    throw new Error("No response from Gemini");
+  }
+
+  return responseText;
 }
 
-/**
- * 3️⃣ runMatching ties it together:
- *    build prompt → send to Gemini → return raw JSON text
- */
 export async function runMatching(mentee, mentors) {
-  console.log("⚙️ Starting Gemini matching...");
-  const prompt = buildMatchingPrompt(mentee, mentors);
-  const aiOutput = await generateCompletion(prompt, "mentor matcher");
-  console.log("✅ Gemini output:\n", aiOutput);
-  return aiOutput;
+  try {
+    console.log("⚙️ Generating prompt...");
+    const prompt = buildMatchingPrompt(mentee, mentors);
+    console.log("📤 Prompt:\n", prompt);
+
+    const output = await generateCompletion(prompt);
+    console.log("✅ Gemini response:\n", output);
+
+    return output;
+  } catch (err) {
+    console.error("❌ Error in runMatching:", err.message);
+    // Return a string, not an object, so JSON.parse doesn't crash
+    return `Error: ${err.message}`;
+  }
 }
