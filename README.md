@@ -9,18 +9,23 @@ A full‑stack wiki application built with HTML, CSS, JavaScript, React, Tailwin
 1. **Clone the repo**
 
    ```bash
+   
    git clone https://github.com/Syedh14/YA-Matching-Project.git
    cd yaproject
+   
+2. **Create a file named .env in the yaproject/backend directory**
 
-2. **Create a file named .env in the yaproject directory**
+   Include the MySQL database, host, user, password, database name, port.
+   Create a secret key for the session of the current user so that another user can't log in onto that same session.
+   Also, include a Gemini-2.0-Flash API key.
+   The naming scheme for these variables should be in index.js and db.js.
+   Set up your database in your MySQLWorkbench 8.0.
 
-   Include the host, user, password, database name, port, secret key, and a Gemini-2.0-Flash API key. 
-
-3. **Open up a terminal and input**
+4. **Open up a terminal and input**
 
    ```bash
 
-   cd yaproject
+   cd yaproject   
 
    ```
 
@@ -29,6 +34,8 @@ A full‑stack wiki application built with HTML, CSS, JavaScript, React, Tailwin
    ```bash
 
    cd backend
+
+   npm install
 
    ```
 
@@ -55,5 +62,5 @@ A full‑stack wiki application built with HTML, CSS, JavaScript, React, Tailwin
    npm start
 
 
-7. **Navigate to http://localhost:3000/ to see the application running**
+6. **Navigate to http://localhost:3000/ to see the application running**
    
