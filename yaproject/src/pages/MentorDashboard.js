@@ -177,39 +177,46 @@ const submitFeedback = async () => {
           <h2 className="text-lg font-bold mb-4">My Confirmed Sessions</h2>
 
           <div className="space-y-4">
-            {confirmedSessions.map((session) => (
-              <div
-              key={session.session_id}
-              className="relative bg-gray-100 hover:bg-gray-200 cursor-pointer transition rounded-lg p-4 shadow-sm hover:shadow-md"
-              onClick={() => {
-                if (!editMode) {
-                  setSelectedSession(session);
-                  setShowModal(true);
-                }
-              }}
-            >
-              {editMode && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // prevent triggering modal
-                    handleDeleteSession(session.session_id);
-                  }}
-                  className="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
-                >
-                  ×
-                </button>
-              )}
-            
-              <div className="text-base font-semibold mb-1">
-                {new Date(session.session_date).toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-700">
-                Type: <span className="font-medium">{session.session_type}</span> | Topic:{" "}
-                <span className="font-medium">{session.topics_covered}</span>
-              </div>
-            </div>            
-            ))}
-          </div>
+  {confirmedSessions.length === 0 ? (
+    <p className="text-center text-gray-500 my-8">
+      There are no confirmed sessions.
+    </p>
+  ) : (
+    confirmedSessions.map((session) => (
+      <div
+        key={session.session_id}
+        className="relative bg-gray-100 hover:bg-gray-200 cursor-pointer transition rounded-lg p-4 shadow-sm hover:shadow-md"
+        onClick={() => {
+          if (!editMode) {
+            setSelectedSession(session);
+            setShowModal(true);
+          }
+        }}
+      >
+        {editMode && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // prevent triggering modal
+              handleDeleteSession(session.session_id);
+            }}
+            className="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
+          >
+            ×
+          </button>
+        )}
+        
+        <div className="text-base font-semibold mb-1">
+          {new Date(session.session_date).toLocaleString()}
+        </div>
+        <div className="text-sm text-gray-700">
+          Type: <span className="font-medium">{session.session_type}</span> | Topic:{" "}
+          <span className="font-medium">{session.topics_covered}</span>
+        </div>
+      </div>
+    ))
+  )}
+</div>
+
 
           <div className="mt-6 flex justify-end gap-3">
           <button
