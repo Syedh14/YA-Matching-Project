@@ -18,26 +18,42 @@ A full‑stack wiki application built with HTML, CSS, JavaScript, React, Tailwin
 
 3. **Open up a terminal and input**
 
+   ```bash
+
    cd yaproject
+
+   ```
 
    **Then input**
 
+   ```bash
+
    cd backend
+
+   ```
 
    **Then to initialize the server, input**
 
+   ```bash
+
    node index.js
 
-4. **Open up another terminal and input**
+5. **Open up another terminal and input**
+
+   ```bash
 
    cd yaproject
 
+   ```
+
    **Then to initialize the frontend of the website, input**
+
+   ```bash
 
    npm install
 
    npm start
 
 
-5. **Navigate to http://localhost:3000/ to see the application running**
+7. **Navigate to http://localhost:3000/ to see the application running**
    
