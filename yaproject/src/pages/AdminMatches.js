@@ -38,20 +38,6 @@ const AiMatches = () => {
       setSelectedMatch(null);
       setIsModalOpen(false);
     };
-
-    const handleApprove = (matchId) => {
-      axios
-        .post(
-          `http://localhost:5001/admin/matches/${matchId}/approve`,
-          {},
-          { withCredentials: true }
-        )
-        .then(() => {
-          // Remove approved match from list
-          setMatches(prev => prev.filter(m => m.id !== matchId));
-        })
-        .catch(err => console.error("Approve failed:", err));
-    };
   
     // Reject handler: deletes old match and fetches a new one
     const handleReject = (matchId) => {
@@ -72,9 +58,7 @@ const AiMatches = () => {
         })
         .catch(err => console.error("Reject failed:", err));
     };
-    const handleButtonClick = (id) => {
-        setMatches(prev => prev.filter(match => match.id !== id));
-    };
+
 
     const handleAccept = async (match) => {
       try {
@@ -109,38 +93,20 @@ const AiMatches = () => {
                   key={match.id}
                   className="flex flex-col md:flex-row md:items-center md:justify-between bg-white border rounded-xl p-4 shadow-sm"
                 >
-                  <strong className="font-bold text-secondary">
-                    {match.mentor}
-                  </strong>{" "}
-                  Matched With{" "}
-                  <strong className="font-bold text-secondary">
-                    {match.mentee}
-                  </strong>
-                </button>
-  
-                <div className="flex gap-6">
-                  <button
-                    onClick={() => handleAccept(match)}
-                    className="bg-secondary text-white font-semibold px-6 py-3 rounded-md hover:bg-primary hover:text-black transition text-lg"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => openModal(match)}
-                    className="text-lg mb-2 md:mb-0 bg-gray-100 hover:bg-gray-200 text-left p-6 rounded-md transition w-full md:w-auto"
-                  >
-                    <strong className="font-bold text-secondary">
-                      {match.mentor}
-                    </strong>{" "}
-                    Matched With{" "}
-                    <strong className="font-bold text-secondary">
-                      {match.mentee}
-                    </strong>
-                  </button>
-  
                   <div className="flex gap-6">
                     <button
-                      onClick={() => handleApprove(match.id)}
+                      onClick={() => openModal(match)}
+                      className="text-lg mb-2 md:mb-0 bg-gray-100 hover:bg-gray-200 text-left p-6 rounded-md transition w-full md:w-auto"
+                    >
+                      <strong className="font-bold text-secondary">{match.mentor}</strong>{" "}
+                      Matched With{" "}
+                      <strong className="font-bold text-secondary">{match.mentee}</strong>
+                    </button>
+                  </div>
+              
+                  <div className="flex gap-6 mt-4 md:mt-0">
+                    <button
+                      onClick={() => handleAccept(match)}
                       className="bg-secondary text-white font-semibold px-6 py-3 rounded-md hover:bg-primary hover:text-black transition text-lg"
                     >
                       Approve
@@ -153,7 +119,7 @@ const AiMatches = () => {
                     </button>
                   </div>
                 </div>
-              ))
+              ))              
             )}
           </div>
         </div>
