@@ -125,23 +125,24 @@ router.post("/signup", (req, res) => {
               academicBackground
             ];
             //db.query(mentorQuery, mentorValues, finishSignup);
-            db.query(mentorQuery, mentorValues, (err) => {
+            db.query(mentorQuery, mentorValues, err => {
                             if (err) return finishSignup(err);
               
-                            // now insert availability slots for this mentor
-                            if (availability.length) {
-                              const availSql = `
-                                INSERT INTO Mentor_Availability (mentor_id, available_date)
-                                VALUES ?
-                              `;
-                              const availVals = availability.map(dt => [userId, dt]);
-                              db.query(availSql, [availVals], (err) => {
-                                if (err) return finishSignup(err);
-                                finishSignup();    
-                              });
-                            } else {
-                              finishSignup();
+                            if (!availability.length) {
+                              return finishSignup();
                             }
+              
+                            // IGNORE duplicates, bulk‑insert the rest
+                            const availSql = `
+                              INSERT IGNORE INTO Mentor_Availability (mentor_id, available_date)
+                              VALUES ?
+                            `;
+                            const availVals = availability.map(dt => [ userId, dt ]);
+              
+                            db.query(availSql, [ availVals ], ignErr => {
+                              if (ignErr) return finishSignup(ignErr);
+                              finishSignup();
+                            });
                           });
               
 
@@ -160,23 +161,24 @@ router.post("/signup", (req, res) => {
               institution
             ];
             //db.query(menteeQuery, menteeValues, finishSignup);
-            db.query(menteeQuery, menteeValues, (err) => {
+            db.query(menteeQuery, menteeValues, err => {
                             if (err) return finishSignup(err);
               
-                            // now insert availability slots for this mentee
-                            if (availability.length) {
-                              const availSql = `
-                                INSERT INTO Mentee_Availability (mentee_id, available_date)
-                                VALUES ?
-                              `;
-                              const availVals = availability.map(dt => [userId, dt]);
-                              db.query(availSql, [availVals], (err) => {
-                                if (err) return finishSignup(err);
-                                finishSignup();
-                              });
-                            } else {
-                              finishSignup();
+                            if (!availability.length) {
+                              return finishSignup();
                             }
+              
+                            // IGNORE duplicates, bulk‑insert the rest
+                            const availSql = `
+                              INSERT IGNORE INTO Mentee_Availability (mentee_id, available_date)
+                              VALUES ?
+                            `;
+                            const availVals = availability.map(dt => [ userId, dt ]);
+              
+                            db.query(availSql, [ availVals ], ignErr => {
+                              if (ignErr) return finishSignup(ignErr);
+                              finishSignup();
+                            });
                           });
           
           // 2. finishSignup now responds *and* then triggers runMatching in background
