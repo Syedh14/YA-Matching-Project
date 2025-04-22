@@ -243,6 +243,8 @@ router.post("/signup", (req, res) => {
                     }));
               
                     try {
+                      console.log(mentee);
+                      console.log(mentors);
                       const aiOutput = await runMatching(mentee, mentors);
                       const match = JSON.parse(aiOutput);
                       console.log("✅ AI Response:", match);
