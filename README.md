@@ -100,17 +100,20 @@ Figure 21: Modal popup which appears when clicking the ‘+’ button and select
 ![image38](https://github.com/user-attachments/assets/2cf54fe0-e15d-499f-bed5-4660df78ba4b)
 Figure 22: Modal popup which appears when clicking the ‘+’ button and selecting ‘Article’ as the resource type. One will be prompted with a description (or article content) for the article.
 
-
 ![image15](https://github.com/user-attachments/assets/b74aa742-00f1-4679-af2c-b1644c5736cd)
 Figure 23: Mentor profile page with all attributes shown. Same functionality as with Admin. 
+
+![image1](https://github.com/user-attachments/assets/107056ac-6935-44e7-a2de-9d0e6d2f3f8c)
+Figure 24: Mentee login modal. 
 
 ![image33](https://github.com/user-attachments/assets/cdb2ba15-77ad-4302-a87a-1ae771b3b653)
 Figure 25: Mentee homepage dashboard with Confirmed Sessions, Mentor Information, Potential Sessions, and Feedback. Same functionality as described with Mentor. Only difference is that the Feedback isn’t conjoined with Mentor Information and that’s because a Mentor could be matched with multiple Mentees (adds complexity when giving feedback to just one Mentee). With a Mentee, since they’ve only got one Mentor, the Feedback is much simpler. They can give feedback to their Mentor or view the feedback that the Mentor gives them. 
 
-
-
 ![image27](https://github.com/user-attachments/assets/1b93f7ea-38fa-4e25-b415-6919d440681a)
 Figure 26: Mentee Progress Reports page. Mentees can only view Progress Reports made by the Mentor; they can’t make reports of their own. 
+
+![image4](https://github.com/user-attachments/assets/325e865c-4b2b-401b-962c-27251cec915f)
+Figure 27: Mentee Resources page. Same functionality as the Mentor Resources page. Any Resources that a Mentee makes will show up in My Resources and in Mentee Resources and/or Videos (in the current session, anyways). 
 
 ![image16](https://github.com/user-attachments/assets/8ce91b9f-529c-464c-a306-9afc3cb2eb44)
 Figure 28: Mentee profile page. 
