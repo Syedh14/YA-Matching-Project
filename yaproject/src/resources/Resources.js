@@ -1,5 +1,3 @@
-
-// src/resources/Resources.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar';
@@ -50,7 +48,8 @@ function Resources() {
           creatorRole: r.creator_role.toLowerCase(),
           title:       r.title,
           description: r.description,
-          type:        r.resource_type === 'Video' ? 'Video' : 'PDF',
+          // show exactly what's in the enum
+          type:        r.resource_type,
           date:        r.upload_date,
           url:         r.url,
         }));
@@ -59,7 +58,7 @@ function Resources() {
       .catch(console.error);
   }, []);
 
-  // 3️⃣ Fetch mentor & mentee IDs for role‑based filters
+  // 3️⃣ Fetch mentor & mentee IDs for role-based filters
   useEffect(() => {
     axios
       .get('http://localhost:5001/mentors', { withCredentials: true })
@@ -71,12 +70,6 @@ function Resources() {
       .then(res => setMenteeIds(new Set(res.data.map(m => m.mentee_id))))
       .catch(console.error);
   }, []);
-
-
-
-    // the FilterBar already gives us exactly the strings we need:
-    const activeFilter = filter;  // 'all' | 'my' | 'global' | 'mentor' | 'mentee' | 'videos'
-
 
   // ── your four buckets ───────────────────────────────────────────
   const myResources     = resources.filter(r => r.creatorId === userId);
@@ -105,7 +98,7 @@ function Resources() {
     setPendingVideoUrl(null);
   };
 
-  // ── new‑resource form ────────────────────────────────────────────
+  // ── new-resource form ────────────────────────────────────────────
   const handleNewResourceChange = e =>
     setNewResource({ ...newResource, [e.target.name]: e.target.value });
 
@@ -113,7 +106,8 @@ function Resources() {
     const payload = {
       title:         newResource.title,
       description:   newResource.description || '',
-      resource_type: newResource.type === 'video' ? 'Video' : 'PDF',
+      // use the exact enum values
+      resource_type: newResource.type === 'video' ? 'Video' : 'Article',
       url:           newResource.url || '',
     };
 
@@ -126,7 +120,7 @@ function Resources() {
           creatorId:   r.user_id,
           title:       r.title,
           description: r.description,
-          type:        r.resource_type === 'Video' ? 'Video' : 'PDF',
+          type:        r.resource_type,
           date:        r.upload_date,
           url:         r.url,
         }));
@@ -137,6 +131,8 @@ function Resources() {
       .catch(console.error);
   };
 
+  const activeFilter = filter;  // 'all' | 'my' | 'global' | 'mentor' | 'mentee' | 'videos'
+
   return (
     <div className="bg-white min-h-screen">
       <Header />
@@ -145,7 +141,6 @@ function Resources() {
 
         <div className="flex-1 p-4">
           <div className="h-[80vh] overflow-y-auto border p-4">
-            {/* ─── ALL / MY / GLOBAL ─────────────────────────────── */}
             {(activeFilter === 'all' || activeFilter === 'my') && (
               <>
                 <h2 className="text-xl font-bold mb-2">My Resources</h2>
@@ -186,7 +181,6 @@ function Resources() {
               </>
             )}
 
-            {/* ─── VIDEOS ONLY ──────────────────────────────────────── */}
             {activeFilter === 'videos' && (
               <>
                 <h2 className="text-xl font-bold mb-4">All Videos</h2>
@@ -207,10 +201,9 @@ function Resources() {
               </>
             )}
 
-            {/* ─── MENTOR‑CREATED ─────────────────────────────────── */}
             {activeFilter === 'mentor' && (
               <>
-                <h2 className="text-xl font-bold mb-4">Mentor‑Created Resources</h2>
+                <h2 className="text-xl font-bold mb-4">Mentor-Created Resources</h2>
                 <div className="grid grid-cols-3 gap-4 mb-10">
                   {mentorResources.length > 0
                     ? mentorResources.map(r => (
@@ -228,10 +221,9 @@ function Resources() {
               </>
             )}
 
-            {/* ─── MENTEE‑CREATED ─────────────────────────────────── */}
             {activeFilter === 'mentee' && (
               <>
-                <h2 className="text-xl font-bold mb-4">Mentee‑Created Resources</h2>
+                <h2 className="text-xl font-bold mb-4">Mentee-Created Resources</h2>
                 <div className="grid grid-cols-3 gap-4 mb-10">
                   {menteeResources.length > 0
                     ? menteeResources.map(r => (
@@ -278,7 +270,7 @@ function Resources() {
                   >
                     <option value="">Select Format</option>
                     <option value="video">Video</option>
-                    <option value="pdf">Article</option>
+                    <option value="article">Article</option>
                   </select>
 
                   {newResource.type === 'video' && (
@@ -292,7 +284,7 @@ function Resources() {
                     />
                   )}
 
-                  {newResource.type === 'pdf' && (
+                  {newResource.type === 'article' && (
                     <textarea
                       name="description"
                       placeholder="Short description"
@@ -364,4 +356,3 @@ function Resources() {
 }
 
 export default Resources;
-
