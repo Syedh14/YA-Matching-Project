@@ -84,7 +84,7 @@ function Login() {
   };
   const closeCreateModal = () => setShowCreateModal(false);
 
-  // display the mentor/mentee popup based on the exact casing
+  
   useEffect(() => {
     if (newRole === 'Mentor') {
       setShowMentorPopup(true);
@@ -99,7 +99,7 @@ function Login() {
   }, [newRole]);
 
   const handleCreateAccount = async () => {
-    // basic validation
+    
     const baseInvalid =
       !firstName.trim() ||
       !lastName.trim() ||
@@ -148,7 +148,7 @@ function Login() {
     try {
       const response = await axios.post("http://localhost:5001/auth/signup", newUser, {withCredentials: true});
 
-      // correctly detect HTTP 201 Created
+      
       if (response.status === 201) {
         setCreateMessage("Account created successfully!");
         setTimeout(() => {
@@ -173,7 +173,7 @@ function Login() {
     add: () => setAvailability([...availability, ""]),
     remove: i => setAvailability(availability.filter((_, idx) => idx !== i))
   };
-  // helpers for dynamic email/phone lists
+  
   const makeListHelpers = (arr, setArr) => ({
     update: (i, val) => {
       const copy = [...arr];
@@ -217,7 +217,7 @@ function Login() {
         </p>
       </div>
 
-      {/* LOGIN MODAL */}
+      
       {showLoginModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
@@ -257,7 +257,7 @@ function Login() {
         </div>
       )}
 
-      {/* CREATE ACCOUNT MODAL */}
+      
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full max-h-full overflow-auto">
@@ -312,7 +312,7 @@ function Login() {
               <option value="Mentee">Mentee</option>
             </select>
 
-            {/* Emails */}
+            
             <div className="mb-4">
               <label className="font-semibold">Email addresses</label>
               {emails.map((em, i) => (
@@ -351,7 +351,7 @@ function Login() {
               </button>
             </div>
 
-            {/* Phones */}
+            
             <div className="mb-4">
               <label className="font-semibold">Phone numbers</label>
               {phones.map((ph, i) => (
@@ -385,7 +385,7 @@ function Login() {
                 + Add phone
               </button>
             </div>
-            {/* Availability */}
+            
             <div className="mb-4">
               <label className="font-semibold">Availability</label>
               {availability.map((dt, i) => (
@@ -416,7 +416,7 @@ function Login() {
              </button>
             </div>
 
-            {/* Goal & Skill */}
+            
             <div className="mb-4">
               <label className="font-semibold">Goal</label>
               <input
@@ -457,7 +457,7 @@ function Login() {
         </div>
       )}
 
-      {/* Mentor popup */}
+      
       {showMentorPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
@@ -488,7 +488,7 @@ function Login() {
         </div>
       )}
 
-      {/* Mentee popup */}
+      
       {showMenteePopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">

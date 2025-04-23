@@ -3,8 +3,7 @@ import db from '../db.js';
 
 const router = express.Router();
 
-// GET /resources
-// ↳ Fetch all resources (only for authenticated users)
+
 router.get('/', (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ message: 'Unauthorized' });
@@ -32,8 +31,7 @@ router.get('/', (req, res) => {
   });
 });
 
-// POST /resources
-// ↳ Add a new resource (only for authenticated users)
+
 router.post('/', (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ message: 'Unauthorized' });
@@ -52,7 +50,7 @@ router.post('/', (req, res) => {
       console.error("Resource insert error:", err);
       return res.status(500).json({ error: err.message });
     }
-    // Fetch and return the newly created resource
+    
     const newId = result.insertId;
     db.query(
       `SELECT resource_id, user_id, title, description, resource_type, url, upload_date 

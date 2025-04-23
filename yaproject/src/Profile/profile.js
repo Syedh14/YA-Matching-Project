@@ -72,7 +72,7 @@ function Profile() {
     return <div>Loading...</div>; 
   }
 
-  // Add these helper objects (like in your signup)
+  
   const emailHelpers = {
     update: (i, val) => setEmails(prev => {
       const updated = [...prev];
@@ -156,7 +156,7 @@ function Profile() {
       <Header />
       <div className="min-h-screen flex items-center justify-center bg-primary">
         <div className="bg-white shadow-md rounded p-10 max-w-lg w-full">
-          {/* Header with an Edit button (if needed) */}
+          
           <div className="flex justify-end gap-2 mb-6">
             <button 
               onClick={() => setShowEditModal(true)}
@@ -172,7 +172,7 @@ function Profile() {
             </button>
           </div>
 
-          {/* Profile Info Header */}
+          
           <div className="flex flex-col items-center mb-4">
             <img
               src="/profile.png"
@@ -187,7 +187,7 @@ function Profile() {
             </p>
           </div>
 
-          {/* Contact Info and Common Fields */}
+          
           <div className="space-y-3 text-left">
             <p className="text-md font-medium">
               ID: {user.user_id || 'N/A'}
@@ -199,41 +199,41 @@ function Profile() {
               Password: {user.password || 'N/A'}
             </p>
             <p className="text-md font-medium">
-              📞 Phone(s): {user.phones?.join(', ') || 'N/A'}
+              Phone(s): {user.phones?.join(', ') || 'N/A'}
             </p>
             <p className="text-md font-medium">
-              📧 Email(s): {user.emails?.join(', ') || 'N/A'}
+              Email(s): {user.emails?.join(', ') || 'N/A'}
             </p>
             {user.role !== 'admin' && (
               <>
-                <p className="text-md font-medium">🎯 Goal: {user.goal || 'N/A'}</p>
-                <p className="text-md font-medium">🛠 Skill: {user.skill || 'N/A'}</p>
+                <p className="text-md font-medium">Goal: {user.goal || 'N/A'}</p>
+                <p className="text-md font-medium">Skill: {user.skill || 'N/A'}</p>
               </>
             )}
-            {/* Role-specific fields */}
+            
             {user.role === 'mentor' && (
               <>
                 <p className="text-md font-medium">
-                  🎓 Academic Background: {user.mentorAcademicStatus || 'N/A'}
+                  Academic Background: {user.mentorAcademicStatus || 'N/A'}
                 </p>
                 <p className="text-md font-medium">
-                  ✅ Active Status: {user.mentorActiveStatus ? 'Active' : 'Inactive'}
+                  Active Status: {user.mentorActiveStatus ? 'Active' : 'Inactive'}
                 </p>
               </>
             )}
             {user.role === 'mentee' && (
               <>
                 <p className="text-md font-medium">
-                  🏫 Institution: {user.menteeInstitution || 'N/A'}
+                  Institution: {user.menteeInstitution || 'N/A'}
                 </p>
                 <p className="text-md font-medium">
-                  🎓 Academic Status: {user.menteeAcademicStatus || 'N/A'}
+                  Academic Status: {user.menteeAcademicStatus || 'N/A'}
                 </p>
               </>
             )}
           </div>
 
-          {/* Contact Button (optional feature) */}
+          
           <div className="mt-6 flex justify-center">
             <button 
               onClick={() => window.location.href = "https://youthachievemission.wixsite.com/website"}
@@ -265,7 +265,7 @@ function Profile() {
                 />
               </div>
 
-              {/* ID (readonly) */}
+              
               <input
                 type="text"
                 value={`ID: ${user.user_id}`}
@@ -273,7 +273,7 @@ function Profile() {
                 className="border rounded w-full p-2 mb-3 bg-gray-100 text-gray-500"
               />
 
-              {/* Username & Password */}
+              
               <input
                 type="text"
                 placeholder="Username"
@@ -289,9 +289,9 @@ function Profile() {
                 onChange={e => setEditPassword(e.target.value)}
               />
 
-              {/* Emails */}
+              
               <div className="mb-4">
-                <label className="font-semibold">📧 Email(s)</label>
+                <label className="font-semibold">Email(s)</label>
                 {emails.map((email, index) => (
                   <div key={index} className="flex items-center mt-2">
                     <input
@@ -321,9 +321,9 @@ function Profile() {
                 </button>
               </div>
 
-              {/* Phones */}
+              
               <div className="mb-4">
-                <label className="font-semibold">📞 Phone(s)</label>
+                <label className="font-semibold">Phone(s)</label>
                 {phones.map((phone, index) => (
                   <div key={index} className="flex items-center mt-2">
                     <input
@@ -357,7 +357,7 @@ function Profile() {
               <>
                 <input
                   type="text"
-                  placeholder="🎯 Goal"
+                  placeholder=" Goal"
                   className="border rounded w-full p-2 mb-3"
                   value={goal}
                   onChange={e => setGoal(e.target.value)}
@@ -380,7 +380,7 @@ function Profile() {
                     />
 
                     <div className="mb-4">
-                      <label className="font-semibold">✅ Active Status</label>
+                      <label className="font-semibold">Active Status</label>
                       <select
                         className="border rounded w-full p-2"
                         value={activeStatus}
@@ -396,7 +396,7 @@ function Profile() {
                   <>
                     <input
                       type="text"
-                      placeholder="🏫 Institution"
+                      placeholder=" Institution"
                       className="border rounded w-full p-2 mb-3"
                       value={institution}
                       onChange={e => setInstitution(e.target.value)}
@@ -414,7 +414,7 @@ function Profile() {
               </>
               )}
 
-              {/* Save/Cancel */}
+              
               <div className="flex justify-end space-x-2">
                 <button
                   className="bg-gray-300 px-4 py-2 rounded"

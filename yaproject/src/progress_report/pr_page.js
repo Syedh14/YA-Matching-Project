@@ -60,7 +60,7 @@ function ProgressReports() {
 
 
   useEffect(() => {
-    // Fetch user role
+    
     axios.get("http://localhost:5001/auth/me", { withCredentials: true })
       .then(res => {
         if (res.data.role) {
@@ -73,7 +73,7 @@ function ProgressReports() {
   }, []);
 
 
-  // NEW: fetch only this mentor's mentees
+  
       useEffect(() => {
         if (role !== 'mentor' || !user) return;
 
@@ -110,13 +110,13 @@ function ProgressReports() {
 
 
       const handleAddReport = async () => {
-        // Basic client‐side guard
+        
         if (!newReport.menteeId) {
           return alert("Please select a mentee before submitting.");
         }
       
         try {
-          // post to the same mount point you declared in index.js:
+          
           const { data } = await axios.post(
             'http://localhost:5001/progress_report',
             {
@@ -128,10 +128,10 @@ function ProgressReports() {
             { withCredentials: true }
           );
       
-          // prepend the new report so it appears immediately
+          
           setReports(r => [data, ...r]);
       
-          // close modal + reset form
+          
           setShowAddModal(false);
           setNewReport({
             menteeId: '',
@@ -194,12 +194,12 @@ function ProgressReports() {
             )}
           </div>
       
-          {/* View Report Modal */}
+          
           {showModal && (
             <ProgressReportModal report={selectedReport} onClose={closeModal} />
           )}
       
-          {/* Add Report Modal */}
+          
           {showAddModal && (
             <AddProgressReportModal
               newReport={newReport}

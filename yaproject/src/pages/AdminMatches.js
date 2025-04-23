@@ -39,7 +39,7 @@ const AiMatches = () => {
       setIsModalOpen(false);
     };
   
-    // Reject handler: deletes old match and fetches a new one
+    // deletes old match and fetches a new one
     const handleReject = (matchId) => {
       axios
         .post(
@@ -73,7 +73,7 @@ const AiMatches = () => {
     
         alert("Match accepted. Sessions generated.");
       } catch (err) {
-        console.error("❌ Accept failed:", err);
+        console.error("Accept failed:", err);
         alert("Error accepting match.");
       }
     };
@@ -124,7 +124,7 @@ const AiMatches = () => {
           </div>
         </div>
   
-        {/* Match Details Modal */}
+        
         {isModalOpen && selectedMatch && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-lg relative shadow-lg">

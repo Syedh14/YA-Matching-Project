@@ -26,7 +26,7 @@ function Resources() {
     description: '',
   });
 
-  // 1️⃣ who’s logged in?
+  
   useEffect(() => {
     axios
       .get('http://localhost:5001/auth/me', { withCredentials: true })
@@ -37,7 +37,7 @@ function Resources() {
       .catch(console.error);
   }, []);
 
-  // 2️⃣ load them all
+  
   const fetchAll = () => {
     axios
       .get('http://localhost:5001/resources', { withCredentials: true })
@@ -45,10 +45,10 @@ function Resources() {
         const mapped = res.data.map(r => ({
           id:          r.resource_id,
           creatorId:   r.user_id,
-          creatorRole: r.creator_role.toLowerCase(),    // ← make sure to grab this
+          creatorRole: r.creator_role.toLowerCase(),    
           title:       r.title,
           description: r.description,
-          type:        r.resource_type,                  // either "Video" or "Article"
+          type:        r.resource_type,                  
           date:        r.upload_date,
           url:         r.url,
         }));
@@ -59,7 +59,7 @@ function Resources() {
 
   useEffect(fetchAll, []);
 
-  // 3️⃣ fetch IDs to help with other filters (unchanged)
+  
   useEffect(() => {
     axios
       .get('http://localhost:5001/mentors', { withCredentials: true })
@@ -72,14 +72,14 @@ function Resources() {
       .catch(console.error);
   }, []);
 
-  // ── buckets ─────────────────────────
+  
   const myResources     = resources.filter(r => r.creatorId === userId);
   const globalResources = resources.filter(r => r.creatorId !== userId);
   const videoResources  = resources.filter(r => r.type === 'Video');
   const mentorResources = resources.filter(r => r.creatorRole === 'mentor');
   const menteeResources = resources.filter(r => r.creatorRole === 'mentee');
 
-  // ── UI handlers ─────────────────────
+  
   const handleResourceClick = r => {
     if (r.type === 'Video' && r.url) {
       setPendingVideoUrl(r.url);
@@ -99,7 +99,7 @@ function Resources() {
     setPendingVideoUrl(null);
   };
 
-  // ── add new ──────────────────────────
+  
   const handleNewResourceChange = e =>
     setNewResource({ ...newResource, [e.target.name]: e.target.value });
 
@@ -113,7 +113,7 @@ function Resources() {
 
     axios
       .post('http://localhost:5001/resources', payload, { withCredentials: true })
-      .then(fetchAll)     // ← re-use our fetchAll so it always maps creatorRole
+      .then(fetchAll)     
       .then(() => {
         setShowAddForm(false);
         setNewResource({ title: '', type: '', url: '', description: '' });
@@ -121,7 +121,7 @@ function Resources() {
       .catch(console.error);
   };
 
-  const activeFilter = filter;  // 'all' | 'my' | 'global' | 'mentor' | 'mentee' | 'videos'
+  const activeFilter = filter;  
 
   return (
     <div className="bg-white min-h-screen">
@@ -221,7 +221,7 @@ function Resources() {
               </>
             )}
 
-            {/* ─── ADD NEW RESOURCE ─────────────────────────────────── */}
+            
             <button
               className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
               onClick={() => setShowAddForm(true)}

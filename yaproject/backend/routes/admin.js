@@ -182,7 +182,7 @@ router.post("/acceptMatch", (req, res) => {
 router.post("/matches/:matchId/reject", (req, res) => {
   const matchId = req.params.matchId;
 
-  // 1) Look up the old mentor & mentee
+  
   db.query(
     `SELECT mentor_id, mentee_id, admin_id
        FROM Matches
@@ -195,7 +195,6 @@ router.post("/matches/:matchId/reject", (req, res) => {
       }
       const { mentor_id, mentee_id, admin_id } = rows[0];
 
-      // 2) Delete the old match
       db.query(
         `DELETE FROM Matches WHERE match_id = ?`,
         [matchId],
@@ -205,7 +204,7 @@ router.post("/matches/:matchId/reject", (req, res) => {
             return res.status(500).json({ error: "Could not delete match" });
           }
 
-          // 3) Fetch mentee + availability
+          
           const menteeSql = `
             SELECT m.mentee_id AS id, m.skills, m.academic_status, m.goals,
                    JSON_ARRAYAGG(ma.available_date) AS availability
@@ -224,7 +223,7 @@ router.post("/matches/:matchId/reject", (req, res) => {
               availability: JSON.parse(menteeRows[0].availability),
             };
 
-            // 4) Fetch all *other* active mentors
+            
             const mentorSql = `
               SELECT t.*, JSON_ARRAYAGG(ma.available_date) AS availability
                 FROM (
@@ -247,12 +246,12 @@ router.post("/matches/:matchId/reject", (req, res) => {
                 availability: JSON.parse(r.availability),
               }));
 
-              // 5) Call Gemini AI (no promise style for DB; this is our one async)
+              
               runMatching(mentee, mentors)
                 .then(aiOutput => {
                   const match = JSON.parse(aiOutput);
 
-                  // 6) Insert the *new* match
+                  
                   const insertSql = `
                     INSERT INTO Matches
                       (mentor_id, mentee_id, admin_id,
@@ -270,7 +269,7 @@ router.post("/matches/:matchId/reject", (req, res) => {
                       return res.status(500).json({ error: "Could not insert new match" });
                     }
 
-                    // 7) Fetch & return the newly inserted match row
+                    
                     const fetchSql = `
                       SELECT
                         mt.match_id AS id,

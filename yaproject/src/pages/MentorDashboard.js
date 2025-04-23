@@ -137,12 +137,12 @@ const submitFeedback = async () => {
         session_status: "Actual"
       };
   
-      // Add to confirmed sessions
+      
       setConfirmedSessions(prev =>
         [...prev, addedSession].sort((a, b) => new Date(a.session_date) - new Date(b.session_date))
       );
   
-      // If updating a potential session, remove it
+      
       if (sessionToReplace !== null) {
         setPotentialSessions(prev =>
           prev.filter((s) => s.session_id !== sessionToReplace)
@@ -150,7 +150,7 @@ const submitFeedback = async () => {
         setSessionToReplace(null);
       }
   
-      // Reset and close modal
+      
       setShowAddModal(false);
       setNewSession({
         mentor_id: user.user_id,
@@ -196,7 +196,7 @@ const submitFeedback = async () => {
         {editMode && (
           <button
             onClick={(e) => {
-              e.stopPropagation(); // prevent triggering modal
+              e.stopPropagation(); 
               handleDeleteSession(session.session_id);
             }}
             className="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
@@ -237,7 +237,7 @@ const submitFeedback = async () => {
                 session_date: "",
                 location: ""
               });
-              setSessionToReplace(null);  // not coming from a potential session
+              setSessionToReplace(null);  
               setShowAddModal(true);
             }}                
           >
@@ -256,7 +256,7 @@ const submitFeedback = async () => {
             <span className="text-xs">(click here for details)</span>
           </button>
             
-          {/* View Feedback button */}
+          
           <button
             onClick={loadMyFeedback}
             className="w-full bg-secondary text-white py-2 rounded hover:bg-primary transition"
@@ -264,7 +264,7 @@ const submitFeedback = async () => {
             View Feedback
           </button>
 
-          {/* Feedback List */}
+          
           {showFeedbackList && (
             <div className="w-full bg-white p-4 rounded shadow mt-2 max-h-64 overflow-auto">
               <h3 className="text-lg font-bold mb-2">Feedback Received</h3>

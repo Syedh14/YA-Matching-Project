@@ -62,7 +62,7 @@ const MenteeDashboard = () => {
   }, [user]);
 
   useEffect(() => {
-    // Fetch assigned mentor
+    
     const fetchMentor = async () => {
       try {
         const response = await axios.get('http://localhost:5001/feedback/mentee/mentor', { withCredentials: true });
@@ -134,12 +134,12 @@ const MenteeDashboard = () => {
         session_status: "Actual"
       };
   
-      // Add to confirmed sessions
+      
       setConfirmedSessions(prev =>
         [...prev, addedSession].sort((a, b) => new Date(a.session_date) - new Date(b.session_date))
       );
   
-      // If updating a potential session, remove it
+      
       if (sessionToReplace !== null) {
         setPotentialSessions(prev =>
           prev.filter((s) => s.session_id !== sessionToReplace)
@@ -147,7 +147,7 @@ const MenteeDashboard = () => {
         setSessionToReplace(null);
       }
   
-      // Reset and close modal
+      
       setShowAddModal(false);
       setNewSession({
         mentor_id: assignedMentor.id,

@@ -2,7 +2,7 @@
 import React from 'react';
 
 function FilterBar({ filter, setFilter }) {
-  // These are your filter options. You can add more or change them as needed.
+  
   const filterOptions = [
     { label: 'All', value: 'all' },
     { label: 'My Resources', value: 'my' },
