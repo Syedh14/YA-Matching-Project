@@ -7,7 +7,7 @@ function AddProgressReportModal({ newReport, setNewReport, onSubmit, onClose, me
         <h2 className="text-xl font-bold mb-4">Add Progress Report</h2>
 
 
-        {/* Dropdown for selecting mentee */}
+        
         <select
           name="menteeId"
           className="w-full mb-2 p-2 border rounded"

@@ -1,5 +1,5 @@
 
-// src/resources/Resources.jsx
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar';
@@ -28,7 +28,7 @@ function Resources() {
     description: '',
   });
 
-  // 1️⃣ Fetch current session (userId + role)
+  
   useEffect(() => {
     axios
       .get('http://localhost:5001/auth/me', { withCredentials: true })
@@ -39,7 +39,7 @@ function Resources() {
       .catch(console.error);
   }, []);
 
-  // 2️⃣ Load all resources
+  
   useEffect(() => {
     axios
       .get('http://localhost:5001/resources', { withCredentials: true })
@@ -59,7 +59,7 @@ function Resources() {
       .catch(console.error);
   }, []);
 
-  // 3️⃣ Fetch mentor & mentee IDs for role‑based filters
+  
   useEffect(() => {
     axios
       .get('http://localhost:5001/mentors', { withCredentials: true })
@@ -74,18 +74,17 @@ function Resources() {
 
 
 
-    // the FilterBar already gives us exactly the strings we need:
-    const activeFilter = filter;  // 'all' | 'my' | 'global' | 'mentor' | 'mentee' | 'videos'
+    
+    const activeFilter = filter;  
 
 
-  // ── your four buckets ───────────────────────────────────────────
   const myResources     = resources.filter(r => r.creatorId === userId);
   const globalResources = resources.filter(r => r.creatorId !== userId);
   const videoResources  = resources.filter(r => r.type === 'Video');
   const mentorResources = resources.filter(r => r.creatorRole === 'mentor');
   const menteeResources = resources.filter(r => r.creatorRole === 'mentee');
 
-  // ── click / redirect handlers ───────────────────────────────────
+  
   const handleResourceClick = r => {
     if (r.type === 'Video' && r.url) {
       setPendingVideoUrl(r.url);
@@ -105,7 +104,7 @@ function Resources() {
     setPendingVideoUrl(null);
   };
 
-  // ── new‑resource form ────────────────────────────────────────────
+  
   const handleNewResourceChange = e =>
     setNewResource({ ...newResource, [e.target.name]: e.target.value });
 
@@ -145,7 +144,7 @@ function Resources() {
 
         <div className="flex-1 p-4">
           <div className="h-[80vh] overflow-y-auto border p-4">
-            {/* ─── ALL / MY / GLOBAL ─────────────────────────────── */}
+            
             {(activeFilter === 'all' || activeFilter === 'my') && (
               <>
                 <h2 className="text-xl font-bold mb-2">My Resources</h2>
@@ -186,7 +185,7 @@ function Resources() {
               </>
             )}
 
-            {/* ─── VIDEOS ONLY ──────────────────────────────────────── */}
+            
             {activeFilter === 'videos' && (
               <>
                 <h2 className="text-xl font-bold mb-4">All Videos</h2>
@@ -207,7 +206,7 @@ function Resources() {
               </>
             )}
 
-            {/* ─── MENTOR‑CREATED ─────────────────────────────────── */}
+            
             {activeFilter === 'mentor' && (
               <>
                 <h2 className="text-xl font-bold mb-4">Mentor‑Created Resources</h2>
@@ -228,7 +227,7 @@ function Resources() {
               </>
             )}
 
-            {/* ─── MENTEE‑CREATED ─────────────────────────────────── */}
+            
             {activeFilter === 'mentee' && (
               <>
                 <h2 className="text-xl font-bold mb-4">Mentee‑Created Resources</h2>
@@ -249,7 +248,7 @@ function Resources() {
               </>
             )}
 
-            {/* ─── ADD NEW RESOURCE ─────────────────────────────────── */}
+            
             <button
               className="fixed bottom-8 right-8 bg-red-600 text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-red-700 transition-all"
               onClick={() => setShowAddForm(true)}

@@ -124,7 +124,7 @@ router.post("/addSession", (req, res) => {
   } = req.body;
 
   if (session_id) {
-    // First delete the potential session
+    
     const deleteQuery = `DELETE FROM Sessions WHERE session_id = ?`;
   
     db.query(deleteQuery, [session_id], (deleteErr, deleteResult) => {
@@ -135,7 +135,7 @@ router.post("/addSession", (req, res) => {
   
       console.log("Deleted potential session:", session_id);
   
-      // Now insert the new Actual session
+      
       const insertQuery = `
         INSERT INTO Sessions 
         (mentor_id, mentee_id, duration, topics_covered, session_type, session_date, location, session_status)

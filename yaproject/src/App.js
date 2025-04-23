@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Import pages
+
 import Login from './pages/Login';
-import TestHeaderPage from './pages/test'; // The page that uses Header
+import TestHeaderPage from './pages/test'; 
 import ProgressReports from './progress_report/pr_page';
 import AdminDashboard from './pages/AdminDashboard';
 import MentorDashboard from './pages/MentorDashboard';

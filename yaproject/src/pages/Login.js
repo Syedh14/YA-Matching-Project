@@ -84,7 +84,7 @@ function Login() {
   };
   const closeCreateModal = () => setShowCreateModal(false);
 
-  // display the mentor/mentee popup based on the exact casing
+  
   useEffect(() => {
     if (newRole === 'Mentor') {
       setShowMentorPopup(true);
@@ -99,7 +99,7 @@ function Login() {
   }, [newRole]);
 
   const handleCreateAccount = async () => {
-    // basic validation
+    
     const baseInvalid =
       !firstName.trim() ||
       !lastName.trim() ||
@@ -148,7 +148,7 @@ function Login() {
     try {
       const response = await axios.post("http://localhost:5001/auth/signup", newUser, {withCredentials: true});
 
-      // correctly detect HTTP 201 Created
+      
       if (response.status === 201) {
         setCreateMessage("Account created successfully!");
         setTimeout(() => {
@@ -173,7 +173,7 @@ function Login() {
     add: () => setAvailability([...availability, ""]),
     remove: i => setAvailability(availability.filter((_, idx) => idx !== i))
   };
-  // helpers for dynamic email/phone lists
+  
   const makeListHelpers = (arr, setArr) => ({
     update: (i, val) => {
       const copy = [...arr];
@@ -282,7 +282,7 @@ function Login() {
                 value={lastName}
                 onChange={e => {
                   const raw = e.target.value;
-                  const cleaned = raw.replace(/[^a-zA-Z]/g, ''); // only letters
+                  const cleaned = raw.replace(/[^a-zA-Z]/g, ''); 
                   const capitalized = cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
                   setLastName(capitalized);
                 }}

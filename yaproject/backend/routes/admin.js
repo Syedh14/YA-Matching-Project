@@ -127,7 +127,7 @@ router.post("/acceptMatch", (req, res) => {
     db.query(insertManages, [admin_id, mentor_id, mentee_id], async (err2) => {
       if (err2) return res.status(500).json({ error: "Error inserting into Manages" });
 
-      // Fetch availability
+      
       const availQuery = `
         SELECT 'Mentor' AS type, available_date 
         FROM Mentor_Availability 

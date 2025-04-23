@@ -156,7 +156,7 @@ function Profile() {
       <Header />
       <div className="min-h-screen flex items-center justify-center bg-primary">
         <div className="bg-white shadow-md rounded p-10 max-w-lg w-full">
-          {/* Header with an Edit button (if needed) */}
+
           <div className="flex justify-end gap-2 mb-6">
             <button 
               onClick={() => setShowEditModal(true)}
@@ -172,7 +172,7 @@ function Profile() {
             </button>
           </div>
 
-          {/* Profile Info Header */}
+          
           <div className="flex flex-col items-center mb-4">
             <img
               src="/profile.png"
@@ -187,7 +187,7 @@ function Profile() {
             </p>
           </div>
 
-          {/* Contact Info and Common Fields */}
+          
           <div className="space-y-3 text-left">
             <p className="text-md font-medium">
               ID: {user.user_id || 'N/A'}
@@ -210,7 +210,7 @@ function Profile() {
                 <p className="text-md font-medium">🛠 Skill: {user.skill || 'N/A'}</p>
               </>
             )}
-            {/* Role-specific fields */}
+            
             {user.role === 'mentor' && (
               <>
                 <p className="text-md font-medium">
@@ -233,7 +233,7 @@ function Profile() {
             )}
           </div>
 
-          {/* Contact Button (optional feature) */}
+          
           <div className="mt-6 flex justify-center">
             <button 
               onClick={() => window.location.href = "https://youthachievemission.wixsite.com/website"}
@@ -265,7 +265,7 @@ function Profile() {
                 />
               </div>
 
-              {/* ID (readonly) */}
+              
               <input
                 type="text"
                 value={`ID: ${user.user_id}`}
@@ -273,7 +273,7 @@ function Profile() {
                 className="border rounded w-full p-2 mb-3 bg-gray-100 text-gray-500"
               />
 
-              {/* Username & Password */}
+              
               <input
                 type="text"
                 placeholder="Username"
@@ -289,7 +289,7 @@ function Profile() {
                 onChange={e => setEditPassword(e.target.value)}
               />
 
-              {/* Emails */}
+              
               <div className="mb-4">
                 <label className="font-semibold">📧 Email(s)</label>
                 {emails.map((email, index) => (
@@ -321,7 +321,7 @@ function Profile() {
                 </button>
               </div>
 
-              {/* Phones */}
+              
               <div className="mb-4">
                 <label className="font-semibold">📞 Phone(s)</label>
                 {phones.map((phone, index) => (
@@ -414,7 +414,7 @@ function Profile() {
               </>
               )}
 
-              {/* Save/Cancel */}
+              
               <div className="flex justify-end space-x-2">
                 <button
                   className="bg-gray-300 px-4 py-2 rounded"

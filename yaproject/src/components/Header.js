@@ -1,4 +1,4 @@
-// src/components/Header.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../images/logo.png';
@@ -29,7 +29,7 @@ const Header = () => {
   ];
 
   const mentorMenteeLinks = [
-    { name: 'Home', path: `/${user.role}` },          // '/mentor' or '/mentee'
+    { name: 'Home', path: `/${user.role}` },          
     { name: 'Progress Reports', path: '/progress_report' },
     { name: 'Resources', path: '/resources' },
     { name: 'Profile', path: '/profile' },

@@ -124,11 +124,11 @@ router.post("/signup", (req, res) => {
               skills,
               academicBackground
             ];
-            //db.query(mentorQuery, mentorValues, finishSignup);
+            
             db.query(mentorQuery, mentorValues, (err) => {
               if (err) return finishSignup(err);
 
-              // now insert availability slots for this mentor
+              
               if (availability.length) {
                 const availSql = `
                   INSERT INTO Mentor_Availability (mentor_id, available_date)
@@ -159,11 +159,11 @@ router.post("/signup", (req, res) => {
               dateJoined,
               institution
             ];
-            //db.query(menteeQuery, menteeValues, finishSignup);
+            
             db.query(menteeQuery, menteeValues, (err) => {
                 if (err) return finishSignupWithGemini(err);
   
-                // now insert availability slots for this mentee
+                
                 if (availability.length) {
                   const availSql = `
                     INSERT INTO Mentee_Availability (mentee_id, available_date)
@@ -187,13 +187,13 @@ router.post("/signup", (req, res) => {
                   return res.status(500).json({ error: err.message });
                 }
               
-                // respond immediately
+                
                 res.status(201).json({
                   message: "Signup successful",
                   userId: userId
                 });
               
-                // → trigger AI match asynchronously
+                
                 const menteeQuery = `
                   SELECT m.mentee_id AS id, m.skills, m.academic_status, m.goals,
                          m.date_joined, m.institution,
@@ -205,7 +205,7 @@ router.post("/signup", (req, res) => {
               
                 db.query(menteeQuery, [userId], (err1, menteeRows) => {
                   if (err1 || menteeRows.length === 0) {
-                    console.error("❌ Error fetching mentee:", err1 || "Mentee not found");
+                    console.error("Error fetching mentee:", err1 || "Mentee not found");
                     return;
                   }
               
@@ -233,7 +233,7 @@ router.post("/signup", (req, res) => {
               
                   db.query(mentorQuery, async (err2, mentorRows) => {
                     if (err2) {
-                      console.error("❌ Error fetching mentors:", err2);
+                      console.error("Error fetching mentors:", err2);
                       return;
                     }
               
@@ -267,13 +267,13 @@ router.post("/signup", (req, res) => {
               
                       db.query(insertMatchQuery, values, (err3) => {
                         if (err3) {
-                          console.error("❌ Error inserting match:", err3);
+                          console.error("Error inserting match:", err3);
                           return;
                         }
-                        console.log("✅ AI match inserted for mentee", userId);
+                        console.log("AI match inserted for mentee", userId);
                       });
                     } catch (e) {
-                      console.error("❌ AI match error for mentee", userId, e);
+                      console.error("AI match error for mentee", userId, e);
                     }
                   });
                 });

@@ -1,4 +1,4 @@
-// src/progressReports/ProgressReportModal.jsx
+
 import React from 'react';
 
 function ProgressReportModal({ report, onClose }) {

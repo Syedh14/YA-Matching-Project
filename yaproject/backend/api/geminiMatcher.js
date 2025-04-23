@@ -86,8 +86,8 @@ export async function runMatching(mentee, mentors) {
 
     return cleanedOutput;
   } catch (err) {
-    console.error("❌ Error in runMatching:", err.message);
-    // Return a string, not an object, so JSON.parse doesn't crash
+    console.error("Error in runMatching:", err.message);
+    
     return `Error: ${err.message}`;
   }
 }

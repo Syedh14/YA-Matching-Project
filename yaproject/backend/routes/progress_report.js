@@ -3,7 +3,7 @@ import db from '../db.js';
 
 const router = express.Router();
 
-// GET: all reports for a mentor (most recent first)
+
 router.get('/mentor/:mentorId', (req, res) => {
   const { mentorId } = req.params;
 
@@ -15,7 +15,7 @@ router.get('/mentor/:mentorId', (req, res) => {
     [mentorId],
     (err, rows) => {
       if (err) {
-        console.error('❌ Error fetching mentor reports:', err);
+        console.error('Error fetching mentor reports:', err);
         return res.status(500).json({ error: 'Server error' });
       }
       res.json(rows);
@@ -24,7 +24,7 @@ router.get('/mentor/:mentorId', (req, res) => {
 });
 
 
-// GET: all reports for a mentee (most recent first)
+
 router.get('/mentee/:menteeId', (req, res) => {
   const { menteeId } = req.params;
 
@@ -37,7 +37,7 @@ router.get('/mentee/:menteeId', (req, res) => {
 
   db.query(query, [menteeId], (err, rows) => {
     if (err) {
-      console.error('❌ Error fetching mentee reports:', err);
+      console.error('Error fetching mentee reports:', err);
       return res.status(500).json({ error: 'Server error' });
     }
 
@@ -54,7 +54,7 @@ router.get('/mentee/:menteeId', (req, res) => {
 //       WHERE role = 'mentee'`,
 //     (err, rows) => {
 //       if (err) {
-//         console.error('❌ Error fetching mentees:', err);
+//         console.error('Error fetching mentees:', err);
 //         return res.status(500).json({ error: 'Server error' });
 //       }
 //       res.json(rows);
@@ -78,7 +78,7 @@ router.get('/mentor/:mentorId/mentees', (req, res) => {
 
   db.query(sql, [mentorId], (err, rows) => {
     if (err) {
-      console.error('❌ Error fetching mentees for mentor:', err);
+      console.error('Error fetching mentees for mentor:', err);
       return res.status(500).json({ error: 'Server error' });
     }
     res.json(rows);
@@ -86,9 +86,9 @@ router.get('/mentor/:mentorId/mentees', (req, res) => {
 });
 
 
-// POST: create a new progress report
+
 router.post('/', (req, res) => {
-  // use the same session key you set in auth.js
+  
   const mentorId = req.session.userId;
   const { menteeId, areasOfImprovement, skillsImproved, challenges } = req.body;
 
@@ -96,7 +96,7 @@ router.post('/', (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  // 1) Insert the new report
+  
   const insertSql = `
     INSERT INTO Progress_Reports
       (mentor_id, mentee_id, areas_of_improvement, skills_improved, challenges)
@@ -113,7 +113,7 @@ router.post('/', (req, res) => {
 
       const newId = result.insertId;
 
-      // 2) Fetch back the newly created row
+      
       const selectSql = `
         SELECT *
         FROM Progress_Reports
@@ -129,7 +129,7 @@ router.post('/', (req, res) => {
           return res.status(500).json({ error: 'Inserted, but not found.' });
         }
 
-        // 3) Return the created report
+        
         res.status(201).json(rows[0]);
       });
     }

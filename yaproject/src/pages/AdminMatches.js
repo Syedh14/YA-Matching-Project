@@ -56,7 +56,7 @@ const AiMatches = () => {
     
         alert("Match accepted. Sessions generated.");
       } catch (err) {
-        console.error("❌ Accept failed:", err);
+        console.error("Accept failed:", err);
         alert("Error accepting match.");
       }
     };

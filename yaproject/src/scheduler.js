@@ -1,4 +1,4 @@
-// src/scheduler.js
+
 
 export function findAvailableMeetingTimes(mentor, mentee) {
     const mentorAvailability = mentor.availability;

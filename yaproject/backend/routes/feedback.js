@@ -1,16 +1,16 @@
-// routes/feedback.js
+
 import express from 'express';
-import db from '../db.js'; // your mysql connection
+import db from '../db.js'; 
 
 const router = express.Router();
 
-// POST /feedback (add feedback to the other party)
+
 router.post('/', (req, res) => {
   const meId = req.session.userId;
-  const meRole = req.session.userRole; // "Mentor" or "Mentee"
+  const meRole = req.session.userRole; 
   const { otherId, score, comment } = req.body;
 
-  // Basic validation
+  
   const numericScore = parseInt(score, 10);
   if (!(numericScore >= 1 && numericScore <= 5)) {
     return res.status(400).send("Score must be between 1 and 5");
@@ -18,7 +18,7 @@ router.post('/', (req, res) => {
 
   let insertSql, params;
   if (meRole === "Mentor") {
-    // Mentor → Mentee feedback
+    
     insertSql = `
       INSERT INTO Mentee_Feedback
         (mentee_id, mentor_id, feedback_score, comments)
@@ -26,7 +26,7 @@ router.post('/', (req, res) => {
     `;
     params = [otherId, meId, numericScore, comment];
   } else if (meRole === "Mentee") {
-    // Mentee → Mentor feedback
+    
     insertSql = `
       INSERT INTO Mentor_Feedback
         (mentor_id, mentee_id, feedback_score, comments)
@@ -46,14 +46,14 @@ router.post('/', (req, res) => {
   });
 });
 
-// GET /feedback (view feedback received by me)
+
 router.get('/', (req, res) => {
   const meId = req.session.userId;
   const meRole = req.session.userRole;
 
   let selectSql, params;
   if (meRole === "Mentor") {
-    // show feedback that mentees gave **to** this mentor
+    
     selectSql = `
       SELECT mentee_id, feedback_score, comments
       FROM Mentor_Feedback
@@ -62,7 +62,7 @@ router.get('/', (req, res) => {
     `;
     params = [meId];
   } else if (meRole === "Mentee") {
-    // show feedback that mentors gave **to** this mentee
+    
     selectSql = `
       SELECT mentor_id, feedback_score, comments
       FROM Mentee_Feedback
@@ -83,7 +83,7 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET /mentor/mentees (fetch mentees assigned to the current mentor)
+
 router.get('/mentor/mentees', (req, res) => {
   const mentorId = req.session.userId;
   if (!mentorId || req.session.userRole !== 'Mentor') {
@@ -110,7 +110,7 @@ router.get('/mentor/mentees', (req, res) => {
 
   db.query(sql, [mentorId], (err, results) => {
     if (err) {
-      console.error("❌ Error fetching mentees:", err);
+      console.error("Error fetching mentees:", err);
       return res.status(500).send('Server error');
     }
 
