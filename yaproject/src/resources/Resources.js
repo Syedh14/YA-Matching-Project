@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar';
 import ResourceModal from './ResourceModal';
@@ -26,7 +26,7 @@ function Resources() {
     description: '',
   });
 
-  // 1️⃣ Fetch current session (userId + role)
+  // 1️⃣ who’s logged in?
   useEffect(() => {
     axios
       .get('http://localhost:5001/auth/me', { withCredentials: true })
@@ -37,28 +37,29 @@ function Resources() {
       .catch(console.error);
   }, []);
 
-  // 2️⃣ Load all resources
-  useEffect(() => {
+  // 2️⃣ load them all
+  const fetchAll = () => {
     axios
       .get('http://localhost:5001/resources', { withCredentials: true })
       .then(res => {
         const mapped = res.data.map(r => ({
           id:          r.resource_id,
           creatorId:   r.user_id,
-          creatorRole: r.creator_role.toLowerCase(),
+          creatorRole: r.creator_role.toLowerCase(),    // ← make sure to grab this
           title:       r.title,
           description: r.description,
-          // show exactly what's in the enum
-          type:        r.resource_type,
+          type:        r.resource_type,                  // either "Video" or "Article"
           date:        r.upload_date,
           url:         r.url,
         }));
         setResources(mapped);
       })
       .catch(console.error);
-  }, []);
+  };
 
-  // 3️⃣ Fetch mentor & mentee IDs for role-based filters
+  useEffect(fetchAll, []);
+
+  // 3️⃣ fetch IDs to help with other filters (unchanged)
   useEffect(() => {
     axios
       .get('http://localhost:5001/mentors', { withCredentials: true })
@@ -71,14 +72,14 @@ function Resources() {
       .catch(console.error);
   }, []);
 
-  // ── your four buckets ───────────────────────────────────────────
+  // ── buckets ─────────────────────────
   const myResources     = resources.filter(r => r.creatorId === userId);
   const globalResources = resources.filter(r => r.creatorId !== userId);
   const videoResources  = resources.filter(r => r.type === 'Video');
   const mentorResources = resources.filter(r => r.creatorRole === 'mentor');
   const menteeResources = resources.filter(r => r.creatorRole === 'mentee');
 
-  // ── click / redirect handlers ───────────────────────────────────
+  // ── UI handlers ─────────────────────
   const handleResourceClick = r => {
     if (r.type === 'Video' && r.url) {
       setPendingVideoUrl(r.url);
@@ -98,7 +99,7 @@ function Resources() {
     setPendingVideoUrl(null);
   };
 
-  // ── new-resource form ────────────────────────────────────────────
+  // ── add new ──────────────────────────
   const handleNewResourceChange = e =>
     setNewResource({ ...newResource, [e.target.name]: e.target.value });
 
@@ -106,25 +107,14 @@ function Resources() {
     const payload = {
       title:         newResource.title,
       description:   newResource.description || '',
-      // use the exact enum values
       resource_type: newResource.type === 'video' ? 'Video' : 'Article',
       url:           newResource.url || '',
     };
 
     axios
       .post('http://localhost:5001/resources', payload, { withCredentials: true })
-      .then(() => axios.get('http://localhost:5001/resources', { withCredentials: true }))
-      .then(res => {
-        const mapped = res.data.map(r => ({
-          id:          r.resource_id,
-          creatorId:   r.user_id,
-          title:       r.title,
-          description: r.description,
-          type:        r.resource_type,
-          date:        r.upload_date,
-          url:         r.url,
-        }));
-        setResources(mapped);
+      .then(fetchAll)     // ← re-use our fetchAll so it always maps creatorRole
+      .then(() => {
         setShowAddForm(false);
         setNewResource({ title: '', type: '', url: '', description: '' });
       })
@@ -145,18 +135,16 @@ function Resources() {
               <>
                 <h2 className="text-xl font-bold mb-2">My Resources</h2>
                 <div className="grid grid-cols-3 gap-4 mb-6">
-                  {myResources.length > 0
-                    ? myResources.map(r => (
-                        <div
-                          key={r.id}
-                          onClick={() => handleResourceClick(r)}
-                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
-                        >
-                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
-                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
-                        </div>
-                      ))
-                    : <p className="text-gray-500">No resources found.</p>}
+                  {myResources.length ? myResources.map(r => (
+                    <div
+                      key={r.id}
+                      onClick={() => handleResourceClick(r)}
+                      className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                      <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                    </div>
+                  )) : <p className="text-gray-500">No resources found.</p>}
                 </div>
               </>
             )}
@@ -165,18 +153,16 @@ function Resources() {
               <>
                 <h2 className="text-xl font-bold mb-2">Global Resources</h2>
                 <div className="grid grid-cols-3 gap-4 mb-10">
-                  {globalResources.length > 0
-                    ? globalResources.map(r => (
-                        <div
-                          key={r.id}
-                          onClick={() => handleResourceClick(r)}
-                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
-                        >
-                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
-                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
-                        </div>
-                      ))
-                    : <p className="text-gray-500">No global resources found.</p>}
+                  {globalResources.length ? globalResources.map(r => (
+                    <div
+                      key={r.id}
+                      onClick={() => handleResourceClick(r)}
+                      className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                      <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                    </div>
+                  )) : <p className="text-gray-500">No global resources found.</p>}
                 </div>
               </>
             )}
@@ -185,18 +171,16 @@ function Resources() {
               <>
                 <h2 className="text-xl font-bold mb-4">All Videos</h2>
                 <div className="grid grid-cols-3 gap-4 mb-10">
-                  {videoResources.length > 0
-                    ? videoResources.map(r => (
-                        <div
-                          key={r.id}
-                          onClick={() => handleResourceClick(r)}
-                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
-                        >
-                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
-                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
-                        </div>
-                      ))
-                    : <p className="text-gray-500">No videos found.</p>}
+                  {videoResources.length ? videoResources.map(r => (
+                    <div
+                      key={r.id}
+                      onClick={() => handleResourceClick(r)}
+                      className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                      <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                    </div>
+                  )) : <p className="text-gray-500">No videos found.</p>}
                 </div>
               </>
             )}
@@ -205,18 +189,16 @@ function Resources() {
               <>
                 <h2 className="text-xl font-bold mb-4">Mentor-Created Resources</h2>
                 <div className="grid grid-cols-3 gap-4 mb-10">
-                  {mentorResources.length > 0
-                    ? mentorResources.map(r => (
-                        <div
-                          key={r.id}
-                          onClick={() => handleResourceClick(r)}
-                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
-                        >
-                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
-                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
-                        </div>
-                      ))
-                    : <p className="text-gray-500">No mentor resources found.</p>}
+                  {mentorResources.length ? mentorResources.map(r => (
+                    <div
+                      key={r.id}
+                      onClick={() => handleResourceClick(r)}
+                      className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                      <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                    </div>
+                  )) : <p className="text-gray-500">No mentor resources found.</p>}
                 </div>
               </>
             )}
@@ -225,18 +207,16 @@ function Resources() {
               <>
                 <h2 className="text-xl font-bold mb-4">Mentee-Created Resources</h2>
                 <div className="grid grid-cols-3 gap-4 mb-10">
-                  {menteeResources.length > 0
-                    ? menteeResources.map(r => (
-                        <div
-                          key={r.id}
-                          onClick={() => handleResourceClick(r)}
-                          className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
-                        >
-                          <div className="text-gray-800 text-lg mb-2">{r.title}</div>
-                          <div className="text-gray-500 text-sm">Date: {r.date}</div>
-                        </div>
-                      ))
-                    : <p className="text-gray-500">No mentee resources found.</p>}
+                  {menteeResources.length ? menteeResources.map(r => (
+                    <div
+                      key={r.id}
+                      onClick={() => handleResourceClick(r)}
+                      className="border p-16 flex flex-col items-center justify-center hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-gray-800 text-lg mb-2">{r.title}</div>
+                      <div className="text-gray-500 text-sm">Date: {r.date}</div>
+                    </div>
+                  )) : <p className="text-gray-500">No mentee resources found.</p>}
                 </div>
               </>
             )}
