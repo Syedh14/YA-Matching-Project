@@ -20,10 +20,10 @@ A full‑stack wiki application built with HTML, CSS, JavaScript, React, Tailwin
    Also, include a Gemini-2.0-Flash API key. You can get this API key here: https://ai.google.dev/gemini-api/docs/quickstart?lang=node
    The naming scheme for these variables should be in index.js and db.js within the backend folder.
    Set up your database in your MySQLWorkbench 8.0. Please ensure that the database is in this version.
+   You may need to run the following in MySQLWorkbench 8.0, ensure that the credentials in the code are replaced with appropriate credentials:
 
    ```bash
    
-   You may need to run the following in MySQLWorkbench 8.0, ensure that the credentials in the code are replaced with appropriate credentials:
    ALTER USER 'root'@'localhost'
    IDENTIFIED WITH mysql_native_password BY 'your_root_password';
    FLUSH PRIVILEGES;
