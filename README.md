@@ -2,6 +2,71 @@
 
 A full‑stack wiki application built with HTML, CSS, JavaScript, React, Tailwind CSS, Express, and MySQL. 
 
+---
+
+## 🚀 Setup
+
+1. **Clone the repo**
+
+   ```bash
+   
+   git clone https://github.com/Syedh14/YA-Matching-Project.git
+   cd yaproject
+   
+2. **Create a file named .env in the yaproject/backend directory**
+
+   Include the MySQL database, host, user, password, database name, port.
+   Create a secret key for the session of the current user so that another user can't log in onto that same session.
+   Also, include a Gemini-2.0-Flash API key.
+   The naming scheme for these variables should be in index.js and db.js.
+   Set up your database in your MySQLWorkbench 8.0.
+
+4. **Open up a terminal and input**
+
+   ```bash
+
+   cd yaproject   
+
+   ```
+
+   **Then input**
+
+   ```bash
+
+   cd backend
+
+   npm install
+
+   ```
+
+   **Then to initialize the server, input**
+
+   ```bash
+
+   node index.js
+
+5. **Open up another terminal and input**
+
+   ```bash
+
+   cd yaproject
+
+   ```
+
+   **Then to initialize the frontend of the website, input**
+
+   ```bash
+
+   npm install
+
+   npm start
+
+
+6. **Navigate to http://localhost:3000/ to see the application running**
+
+
+---
+
 ##  System Description 
 
 The Mentor Mentee website exists as a partnership with the charitable organization Youth Achieve. This system we’ve built is a full‑stack web application that ties together a user‑friendly front end, a RESTful back end, and a relational MentorMenteeDB to ensure every match and meeting is truly meaningful.
@@ -117,69 +182,6 @@ Figure 27: Mentee Resources page. Same functionality as the Mentor Resources pag
 
 ![image16](https://github.com/user-attachments/assets/8ce91b9f-529c-464c-a306-9afc3cb2eb44)
 Figure 28: Mentee profile page. 
-
----
-
-## 🚀 Setup
-
-1. **Clone the repo**
-
-   ```bash
-   
-   git clone https://github.com/Syedh14/YA-Matching-Project.git
-   cd yaproject
-   
-2. **Create a file named .env in the yaproject/backend directory**
-
-   Include the MySQL database, host, user, password, database name, port.
-   Create a secret key for the session of the current user so that another user can't log in onto that same session.
-   Also, include a Gemini-2.0-Flash API key.
-   The naming scheme for these variables should be in index.js and db.js.
-   Set up your database in your MySQLWorkbench 8.0.
-
-4. **Open up a terminal and input**
-
-   ```bash
-
-   cd yaproject   
-
-   ```
-
-   **Then input**
-
-   ```bash
-
-   cd backend
-
-   npm install
-
-   ```
-
-   **Then to initialize the server, input**
-
-   ```bash
-
-   node index.js
-
-5. **Open up another terminal and input**
-
-   ```bash
-
-   cd yaproject
-
-   ```
-
-   **Then to initialize the frontend of the website, input**
-
-   ```bash
-
-   npm install
-
-   npm start
-
-
-6. **Navigate to http://localhost:3000/ to see the application running**
-
 
 ---
 
